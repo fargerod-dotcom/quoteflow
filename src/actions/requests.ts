@@ -1,5 +1,6 @@
 "use server";
 
+import { File as NodeFile } from "node:buffer";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { uploadPhoto } from "@/lib/storage/blob";
@@ -14,6 +15,10 @@ const CONFIDENCE_MAP: Record<string, QuoteConfidence> = {
   medium: "MEDIUM",
   high: "HIGH",
 };
+
+// Node 18 has no global `File` constructor (added in Node 20); fall back to
+// node:buffer's implementation so file uploads work on older runtimes too.
+const FileCtor: typeof File = (globalThis.File ?? NodeFile) as typeof File;
 
 export async function createRequest(formData: FormData): Promise<void> {
   const slug = String(formData.get("slug") ?? "");
@@ -43,7 +48,7 @@ export async function createRequest(formData: FormData): Promise<void> {
 
   const photoFiles = formData
     .getAll("photos")
-    .filter((f): f is File => f instanceof File && f.size > 0)
+    .filter((f): f is File => f instanceof FileCtor && f.size > 0)
     .slice(0, MAX_PHOTOS);
 
   for (const file of photoFiles) {
