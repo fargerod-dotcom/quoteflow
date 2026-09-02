@@ -61,11 +61,6 @@ npm run test
 
 ## Deploying
 
-Target is Vercel + a managed Postgres (Neon/Railway/etc.), budget under
-$50/month. `vercel.json` wires up the 48-hour follow-up reminder as an hourly
-Vercel Cron job hitting `/api/cron/follow-up` — set `CRON_SECRET` in your
-Vercel project's env vars so Vercel's own cron requests authenticate against it.
-
-Remember to point `STRIPE_WEBHOOK_SECRET` at a webhook endpoint subscribed to
-`checkout.session.completed`, `customer.subscription.updated`, and
-`customer.subscription.deleted`, pointed at `/api/stripe/webhook`.
+Target is Railway (app + Postgres + a small cron service), roughly $5–10/month
+at this stage. See [DEPLOY.md](./DEPLOY.md) for the full step-by-step,
+including every environment variable and exactly where each one comes from.
