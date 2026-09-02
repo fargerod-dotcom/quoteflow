@@ -150,7 +150,7 @@ export default function LandingPage() {
       {/* Pricing */}
       <section className="bg-slate-900 text-white">
         <div className="mx-auto max-w-5xl px-6 py-16 text-center">
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">One plan. One missed job pays for the year.</h2>
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Simple pricing. One extra job a year covers it.</h2>
           <p className="mt-6 text-5xl font-bold">
             $49<span className="text-xl font-medium text-slate-400">/month</span>
           </p>
