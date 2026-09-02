@@ -16,10 +16,14 @@ export function formatPhone(raw: string): string {
   return raw;
 }
 
-/** Normalizes a phone number to E.164-ish (+1XXXXXXXXXX) for Twilio. Best-effort, US-first MVP. */
+/** Normalizes a phone number to E.164 for Twilio. Handles a leading "+" or the
+ * "00" international dialing prefix (common outside the US); otherwise
+ * assumes a bare US-style number. Best-effort, not full E.164 validation. */
 export function toE164(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  if (raw.trim().startsWith("+")) return `+${digits}`;
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("+")) return `+${trimmed.replace(/\D/g, "")}`;
+  if (trimmed.startsWith("00")) return `+${trimmed.replace(/\D/g, "").slice(2)}`;
+  const digits = trimmed.replace(/\D/g, "");
   if (digits.length === 10) return `+1${digits}`;
   if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
   return `+${digits}`;
