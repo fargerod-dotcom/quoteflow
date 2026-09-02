@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Resend from "next-auth/providers/resend";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/email/resend";
+import { sendMagicLinkEmail } from "@/lib/auth-email";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -13,17 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Resend({
       from: process.env.EMAIL_FROM ?? "QuoteFlow <noreply@example.com>",
-      sendVerificationRequest: async ({ identifier, url }) => {
-        await sendEmail({
-          to: identifier,
-          subject: "Your QuoteFlow sign-in link",
-          html: `
-            <p>Click the link below to sign in to QuoteFlow:</p>
-            <p><a href="${url}">${url}</a></p>
-            <p>If you didn't request this, you can ignore this email.</p>
-          `,
-        });
-      },
+      sendVerificationRequest: sendMagicLinkEmail,
     }),
   ],
   pages: {
