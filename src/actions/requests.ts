@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { uploadPhoto } from "@/lib/storage/blob";
 import { draftQuote, type PhotoInput } from "@/lib/ai/claude-client";
 import { sendSms } from "@/lib/sms/twilio";
+import { sendEmail } from "@/lib/email/resend";
+import { ownerNewRequestEmailHtml } from "@/lib/email/templates";
 import { interpolate } from "@/lib/utils";
 import { OWNER_NEW_REQUEST_SMS, MAX_PHOTOS, MAX_PHOTO_BYTES } from "@/lib/constants";
 import type { QuoteConfidence } from "@prisma/client";
@@ -120,14 +122,29 @@ export async function createRequest(formData: FormData): Promise<void> {
     },
   });
 
+  const reviewLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/requests/${request.id}`;
   await sendSms({
     to: business.ownerPhone,
-    body: interpolate(OWNER_NEW_REQUEST_SMS, {
-      customerName,
-      customerAddress,
-      link: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/requests/${request.id}`,
-    }),
+    body: interpolate(OWNER_NEW_REQUEST_SMS, { customerName, customerAddress, link: reviewLink }),
   });
+
+  // Also email the owner — SMS can be missed, and the email carries the full description.
+  const owner = await prisma.user.findUnique({ where: { id: business.userId }, select: { email: true } });
+  const ownerEmail = business.ownerNotifyEmail ?? owner?.email;
+  if (ownerEmail) {
+    await sendEmail({
+      to: ownerEmail,
+      subject: `New job request: ${customerName} — ${customerAddress}`,
+      html: ownerNewRequestEmailHtml({
+        businessName: business.name,
+        customerName,
+        address: customerAddress,
+        description,
+        total: aiResult.draft.total,
+        link: reviewLink,
+      }),
+    });
+  }
 
   redirect(`/r/${slug}/thanks`);
 }

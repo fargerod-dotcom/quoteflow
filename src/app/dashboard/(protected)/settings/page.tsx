@@ -4,6 +4,7 @@ import { updatePrices, updateSmsTemplates } from "@/actions/settings";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { ShareLinkCard } from "@/components/request/ShareLinkCard";
 import {
   DEFAULT_SMS_TEMPLATE_NEW_QUOTE,
   DEFAULT_SMS_TEMPLATE_FOLLOW_UP,
@@ -15,10 +16,12 @@ export default async function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold text-slate-900">Settings</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-slate-900">Settings</h1>
 
-      <Card>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">Pricing & service area</h2>
+      <ShareLinkCard url={`${process.env.NEXT_PUBLIC_APP_URL}/r/${business.slug}`} />
+
+      <Card className="p-5">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Pricing & service area</h2>
         <form action={updatePrices} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -56,8 +59,8 @@ export default async function SettingsPage() {
         </form>
       </Card>
 
-      <Card>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">SMS templates</h2>
+      <Card className="p-5">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">SMS templates</h2>
         <p className="mb-3 text-xs text-slate-500">
           Use {"{{customerName}}"}, {"{{businessName}}"}, {"{{total}}"}, {"{{link}}"}, {"{{scheduledDate}}"} as placeholders.
         </p>
@@ -95,8 +98,8 @@ export default async function SettingsPage() {
         </form>
       </Card>
 
-      <Card>
-        <h2 className="mb-1 text-sm font-semibold text-slate-700">Billing</h2>
+      <Card className="p-5">
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wider text-slate-500">Billing</h2>
         <p className="mb-3 text-sm text-slate-600">Manage your subscription and payment method.</p>
         <Link href="/dashboard/billing" className="text-sm font-medium text-brand-600 hover:underline">
           Go to billing →

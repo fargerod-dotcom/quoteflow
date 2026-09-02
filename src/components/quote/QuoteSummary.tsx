@@ -5,31 +5,39 @@ export function QuoteSummary({
   lineItems,
   total,
   summary,
+  estimatedHours,
 }: {
   lineItems: LineItem[];
   total: number;
   summary: string;
+  estimatedHours?: number;
 }) {
   return (
     <div>
-      <p className="text-sm text-slate-700">{summary}</p>
+      <p className="text-[15px] leading-relaxed text-slate-700">{summary}</p>
 
-      <div className="mt-4 divide-y divide-slate-100 rounded-lg border border-slate-200">
+      <div className="mt-5 overflow-hidden rounded-xl border border-slate-200">
         {lineItems.map((item, i) => (
-          <div key={i} className="flex items-center justify-between px-3 py-2 text-sm">
+          <div key={i} className="flex items-center justify-between gap-4 border-b border-slate-100 px-4 py-3 text-sm">
             <span className="text-slate-700">
-              {item.description} {item.quantity !== 1 ? `× ${item.quantity}` : ""}
+              {item.description}
+              {item.quantity !== 1 && <span className="text-slate-400"> × {item.quantity}</span>}
             </span>
-            <span className="font-medium text-slate-900">
+            <span className="whitespace-nowrap font-medium text-slate-900">
               {formatCurrency(item.quantity * item.unitPrice)}
             </span>
           </div>
         ))}
-        <div className="flex items-center justify-between px-3 py-2 text-sm font-semibold">
-          <span>Total</span>
-          <span>{formatCurrency(total)}</span>
+        <div className="flex items-center justify-between bg-slate-50 px-4 py-3">
+          <span className="text-base font-semibold text-slate-900">Total</span>
+          <span className="text-xl font-bold text-brand-600">{formatCurrency(total)}</span>
         </div>
       </div>
+      {estimatedHours !== undefined && estimatedHours > 0 && (
+        <p className="mt-2 text-xs text-slate-500">
+          Estimated time on site: about {estimatedHours} hour{estimatedHours === 1 ? "" : "s"}
+        </p>
+      )}
     </div>
   );
 }

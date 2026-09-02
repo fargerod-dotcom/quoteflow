@@ -16,7 +16,7 @@ export function LineItemsEditor({ initialLineItems }: { initialLineItems: LineIt
   }
 
   function removeItem(index: number) {
-    setItems((prev) => prev.filter((_, i) => i !== index));
+    setItems((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
   }
 
   function addItem() {
@@ -26,45 +26,60 @@ export function LineItemsEditor({ initialLineItems }: { initialLineItems: LineIt
   const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <input type="hidden" name="lineItems" value={JSON.stringify(items)} />
 
-      <div className="grid grid-cols-[1fr_5rem_6rem_2rem] gap-2 text-xs font-medium text-slate-500">
-        <span>Description</span>
-        <span>Qty</span>
-        <span>Unit price</span>
-        <span />
-      </div>
-
       {items.map((item, index) => (
-        <div key={index} className="grid grid-cols-[1fr_5rem_6rem_2rem] gap-2">
-          <Input
-            value={item.description}
-            onChange={(e) => updateItem(index, { description: e.target.value })}
-            placeholder="Line item description"
-          />
-          <Input
-            type="number"
-            min="0"
-            step="0.1"
-            value={item.quantity}
-            onChange={(e) => updateItem(index, { quantity: Number(e.target.value) })}
-          />
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            value={item.unitPrice}
-            onChange={(e) => updateItem(index, { unitPrice: Number(e.target.value) })}
-          />
-          <button
-            type="button"
-            onClick={() => removeItem(index)}
-            className="text-slate-400 hover:text-red-600"
-            aria-label="Remove line item"
-          >
-            ×
-          </button>
+        <div key={index} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex items-start gap-2">
+            <Input
+              value={item.description}
+              onChange={(e) => updateItem(index, { description: e.target.value })}
+              placeholder="e.g. Labour, Call-out fee, Replacement valve"
+              className="bg-white"
+              aria-label="Line item description"
+            />
+            <button
+              type="button"
+              onClick={() => removeItem(index)}
+              disabled={items.length === 1}
+              className="mt-2 flex-shrink-0 px-1 text-lg leading-none text-slate-400 hover:text-red-600 disabled:opacity-30"
+              aria-label="Remove line item"
+            >
+              ×
+            </button>
+          </div>
+          <div className="mt-2 grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+            <div>
+              <span className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-500">Qty</span>
+              <Input
+                type="number"
+                min="0"
+                step="0.25"
+                inputMode="decimal"
+                value={item.quantity}
+                onChange={(e) => updateItem(index, { quantity: Number(e.target.value) })}
+                className="bg-white"
+                aria-label="Quantity"
+              />
+            </div>
+            <div>
+              <span className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-slate-500">Unit price</span>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                value={item.unitPrice}
+                onChange={(e) => updateItem(index, { unitPrice: Number(e.target.value) })}
+                className="bg-white"
+                aria-label="Unit price"
+              />
+            </div>
+            <div className="pb-2.5 text-right text-sm font-semibold text-slate-900 min-w-[4.5rem]">
+              {formatCurrency(item.quantity * item.unitPrice)}
+            </div>
+          </div>
         </div>
       ))}
 
@@ -72,8 +87,9 @@ export function LineItemsEditor({ initialLineItems }: { initialLineItems: LineIt
         + Add line item
       </Button>
 
-      <div className="mt-2 flex justify-end border-t border-slate-200 pt-2 text-sm font-semibold text-slate-900">
-        Total: {formatCurrency(total)}
+      <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+        <span className="text-sm font-medium text-slate-500">Total</span>
+        <span className="text-xl font-bold text-slate-900">{formatCurrency(total)}</span>
       </div>
     </div>
   );
