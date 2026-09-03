@@ -1,3 +1,9 @@
+/** Currency used for every quote/amount in the app. */
+export const CURRENCY = "NOK";
+export const CURRENCY_LOCALE = "nb-NO";
+/** Country code assumed for phone numbers entered without one. */
+export const DEFAULT_COUNTRY_CODE = "47";
+
 export const TRADES = [
   { value: "PLUMBING", label: "Plumbing" },
   { value: "ELECTRICAL", label: "Electrical" },

@@ -52,18 +52,18 @@ export default function OnboardingPage() {
               placeholder="(555) 123-4567"
             />
             <p className="mt-1 text-xs text-slate-500">
-              We text you here the moment a request comes in. Outside the US? Start with your country code, e.g. +47.
+              We text you here the moment a request comes in. Norwegian numbers can be entered as 8 digits; otherwise start with your country code.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="hourlyRate">Hourly rate ($)</Label>
-              <Input id="hourlyRate" name="hourlyRate" type="number" min="0" step="0.01" inputMode="decimal" required placeholder="95" />
+              <Label htmlFor="hourlyRate">Hourly rate (kr)</Label>
+              <Input id="hourlyRate" name="hourlyRate" type="number" min="0" step="0.01" inputMode="decimal" required placeholder="950" />
             </div>
             <div>
-              <Label htmlFor="calloutFee">Call-out fee ($)</Label>
-              <Input id="calloutFee" name="calloutFee" type="number" min="0" step="0.01" inputMode="decimal" required placeholder="75" />
+              <Label htmlFor="calloutFee">Call-out fee (kr)</Label>
+              <Input id="calloutFee" name="calloutFee" type="number" min="0" step="0.01" inputMode="decimal" required placeholder="500" />
             </div>
           </div>
           <p className="-mt-2 text-xs text-slate-500">You can change these any time in Settings.</p>

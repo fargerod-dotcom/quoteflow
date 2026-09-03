@@ -44,12 +44,12 @@ describe("sendSms", () => {
     process.env.TWILIO_FROM_NUMBER = "+15559990000";
 
     const { sendSms } = await import("@/lib/sms/twilio");
-    const result = await sendSms({ to: "5551234567", body: "hi there" });
+    const result = await sendSms({ to: "980 53 546", body: "hi there" });
 
     expect(result.sent).toBe(true);
     expect(twilioConstructor).toHaveBeenCalledWith("ACxxxx", "authtoken");
     expect(messagesCreate).toHaveBeenCalledWith({
-      to: "+15551234567",
+      to: "+4798053546",
       from: "+15559990000",
       body: "hi there",
     });

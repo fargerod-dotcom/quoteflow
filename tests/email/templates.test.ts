@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { quoteEmailHtml, bookingConfirmedEmailHtml, ownerNewRequestEmailHtml } from "@/lib/email/templates";
 
+/** Intl uses narrow no-break spaces in nb-NO output; normalise for assertions. */
+const nok = (s: string) => s.replace(/\s/g, " ");
+
 describe("quoteEmailHtml", () => {
   const html = quoteEmailHtml({
     businessName: "Joe's Plumbing",
@@ -17,11 +20,11 @@ describe("quoteEmailHtml", () => {
 
   it("includes every line item with its extended price and the total", () => {
     expect(html).toContain("Call-out fee");
-    expect(html).toContain("$75.00");
+    expect(nok(html)).toContain("75,00 kr");
     expect(html).toContain("Labour");
     expect(html).toContain("× 1.5");
-    expect(html).toContain("$142.50");
-    expect(html).toContain("$217.50");
+    expect(nok(html)).toContain("142,50 kr");
+    expect(nok(html)).toContain("217,50 kr");
   });
 
   it("links to the accept page and names the business", () => {
@@ -58,7 +61,7 @@ describe("bookingConfirmedEmailHtml", () => {
     });
     expect(html).toContain("Sep 10");
     expect(html).toContain("12 Main St");
-    expect(html).toContain("$217.50");
+    expect(nok(html)).toContain("217,50 kr");
     expect(html).toContain('href="https://calendar.google.com/x"');
   });
 });
@@ -74,7 +77,7 @@ describe("ownerNewRequestEmailHtml", () => {
       link: "https://example.com/dashboard/requests/1",
     });
     expect(html).toContain("Leaking\nunder sink");
-    expect(html).toContain("$125.00");
+    expect(nok(html)).toContain("125,00 kr");
     expect(html).toContain('href="https://example.com/dashboard/requests/1"');
   });
 });
