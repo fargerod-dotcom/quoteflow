@@ -24,12 +24,19 @@ beforeEach(() => {
 });
 
 describe("updatePrices", () => {
+  it("clamps the MVA rate to 0–100 and defaults to 25 when missing", async () => {
+    await updatePrices(formData({ hourlyRate: "1", calloutFee: "1", vatRate: "150" }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ vatRate: 100 }) }));
+    await updatePrices(formData({ hourlyRate: "1", calloutFee: "1", vatRate: "0" }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ vatRate: 0 }) }));
+  });
+
   it("parses numeric fields and writes them scoped to the caller's business", async () => {
-    await updatePrices(formData({ hourlyRate: "99.5", calloutFee: "55", serviceArea: "New area" }));
+    await updatePrices(formData({ hourlyRate: "99.5", calloutFee: "55", vatRate: "25", serviceArea: "New area" }));
 
     expect(update).toHaveBeenCalledWith({
       where: { id: "biz-1" },
-      data: { hourlyRate: 99.5, calloutFee: 55, serviceArea: "New area" },
+      data: { hourlyRate: 99.5, calloutFee: 55, vatRate: 25, serviceArea: "New area" },
     });
     expect(revalidatePath).toHaveBeenCalledWith("/dashboard/settings");
   });
@@ -39,7 +46,7 @@ describe("updatePrices", () => {
 
     expect(update).toHaveBeenCalledWith({
       where: { id: "biz-1" },
-      data: { hourlyRate: 10, calloutFee: 5, serviceArea: null },
+      data: { hourlyRate: 10, calloutFee: 5, vatRate: 25, serviceArea: null },
     });
   });
 });

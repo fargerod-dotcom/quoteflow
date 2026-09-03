@@ -130,7 +130,7 @@ export default async function PublicQuotePage({ params }: { params: { acceptToke
     <Shell businessName={business.name} eyebrow={`Quote for ${quote.request.customerName}`}>
       <QuoteSummary
         lineItems={lineItems}
-        total={Number(quote.total)}
+        vatRate={Number(quote.vatRate)}
         summary={quote.summary}
         estimatedHours={Number(quote.estimatedHours)}
       />

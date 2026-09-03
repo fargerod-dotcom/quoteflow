@@ -7,6 +7,7 @@ import { uploadPhoto } from "@/lib/storage/blob";
 import { draftQuote, type PhotoInput } from "@/lib/ai/claude-client";
 import { sendSms } from "@/lib/sms/twilio";
 import { sendEmail } from "@/lib/email/resend";
+import { calcTotals } from "@/lib/vat";
 import { ownerNewRequestEmailHtml } from "@/lib/email/templates";
 import { interpolate } from "@/lib/utils";
 import { OWNER_NEW_REQUEST_SMS, MAX_PHOTOS, MAX_PHOTO_BYTES } from "@/lib/constants";
@@ -109,12 +110,16 @@ export async function createRequest(formData: FormData): Promise<void> {
     });
   }
 
+  // The AI prices ex-MVA; the stored total is what the customer actually pays.
+  const totals = calcTotals(aiResult.draft.lineItems, Number(business.vatRate));
+
   await prisma.quote.create({
     data: {
       requestId: request.id,
       lineItems: aiResult.draft.lineItems,
       estimatedHours: aiResult.draft.estimatedHours,
-      total: aiResult.draft.total,
+      total: totals.total,
+      vatRate: business.vatRate,
       summary: aiResult.draft.summary,
       confidence: CONFIDENCE_MAP[aiResult.draft.confidence],
       aiRawResponse: aiResult.raw ? { text: String(aiResult.raw) } : undefined,
@@ -140,7 +145,7 @@ export async function createRequest(formData: FormData): Promise<void> {
         customerName,
         address: customerAddress,
         description,
-        total: aiResult.draft.total,
+        total: totals.total,
         link: reviewLink,
       }),
     });

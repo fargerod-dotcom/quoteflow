@@ -90,6 +90,8 @@ model Business {
 
   hourlyRate  Decimal @db.Decimal(10, 2)
   calloutFee  Decimal @db.Decimal(10, 2)
+  /// MVA (VAT) percentage added on top of ex-MVA line items. 0 if not registered.
+  vatRate     Decimal @default(25) @db.Decimal(5, 2)
 
   smsTemplateNewQuote     String? @db.Text
   smsTemplateFollowUp     String? @db.Text
@@ -175,7 +177,10 @@ model Quote {
 
   lineItems        Json
   estimatedHours   Decimal         @db.Decimal(6, 2)
+  /// Total the customer pays, including MVA.
   total            Decimal         @db.Decimal(10, 2)
+  /// MVA percentage snapshotted from the business when the quote was drafted.
+  vatRate          Decimal         @default(25) @db.Decimal(5, 2)
   summary          String          @db.Text
   confidence       QuoteConfidence @default(MEDIUM)
   aiRawResponse    Json?

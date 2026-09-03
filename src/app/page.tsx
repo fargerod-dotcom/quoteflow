@@ -83,6 +83,7 @@ export default function LandingPage() {
                     ["Call-out fee", "590 kr"],
                     ["Labour × 1.5h", "1 425 kr"],
                     ["P-trap kit", "240 kr"],
+                    ["MVA 25%", "564 kr"],
                   ].map(([k, v]) => (
                     <div key={k} className="flex justify-between px-3 py-2">
                       <span className="text-slate-600">{k}</span>
@@ -90,8 +91,8 @@ export default function LandingPage() {
                     </div>
                   ))}
                   <div className="flex justify-between px-3 py-2 font-bold">
-                    <span>Total</span>
-                    <span className="text-brand-600">2 255 kr</span>
+                    <span>Total inkl. mva</span>
+                    <span className="text-brand-600">2 819 kr</span>
                   </div>
                 </div>
                 <div className="mt-3 flex gap-2">

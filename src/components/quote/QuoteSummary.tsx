@@ -1,17 +1,20 @@
 import { formatCurrency } from "@/lib/utils";
+import { calcTotals } from "@/lib/vat";
 import type { LineItem } from "@/lib/ai/schema";
 
 export function QuoteSummary({
   lineItems,
-  total,
+  vatRate,
   summary,
   estimatedHours,
 }: {
   lineItems: LineItem[];
-  total: number;
+  /** MVA percentage applied on top of the ex-MVA line items. */
+  vatRate: number;
   summary: string;
   estimatedHours?: number;
 }) {
+  const { subtotal, vat, total } = calcTotals(lineItems, vatRate);
   return (
     <div>
       <p className="text-[15px] leading-relaxed text-slate-700">{summary}</p>
@@ -28,8 +31,20 @@ export function QuoteSummary({
             </span>
           </div>
         ))}
+        {vatRate > 0 && (
+          <div className="space-y-1 bg-slate-50 px-4 pt-3 text-sm text-slate-600">
+            <div className="flex items-center justify-between">
+              <span>Subtotal ekskl. mva</span>
+              <span>{formatCurrency(subtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>MVA {vatRate}%</span>
+              <span>{formatCurrency(vat)}</span>
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between bg-slate-50 px-4 py-3">
-          <span className="text-base font-semibold text-slate-900">Total</span>
+          <span className="text-base font-semibold text-slate-900">{vatRate > 0 ? "Total inkl. mva" : "Total"}</span>
           <span className="text-xl font-bold text-brand-600">{formatCurrency(total)}</span>
         </div>
       </div>

@@ -13,7 +13,8 @@ describe("quoteEmailHtml", () => {
       { description: "Call-out fee", quantity: 1, unitPrice: 75 },
       { description: "Labour", quantity: 1.5, unitPrice: 95 },
     ],
-    total: 217.5,
+    vatRate: 25,
+    total: 271.88,
     estimatedHours: 1.5,
     link: "https://example.com/q/abc",
   });
@@ -24,7 +25,25 @@ describe("quoteEmailHtml", () => {
     expect(html).toContain("Labour");
     expect(html).toContain("× 1.5");
     expect(nok(html)).toContain("142,50 kr");
-    expect(nok(html)).toContain("217,50 kr");
+    expect(nok(html)).toContain("217,50 kr"); // subtotal ekskl. mva
+    expect(nok(html)).toContain("MVA 25%");
+    expect(nok(html)).toContain("54,38 kr");
+    expect(nok(html)).toContain("271,88 kr");
+    expect(html).toContain("Total inkl. mva");
+  });
+
+  it("omits the MVA rows when the rate is 0", () => {
+    const plain = quoteEmailHtml({
+      businessName: "B",
+      customerName: "S",
+      summary: "s",
+      lineItems: [{ description: "x", quantity: 1, unitPrice: 100 }],
+      vatRate: 0,
+      total: 100,
+      estimatedHours: 1,
+      link: "https://example.com",
+    });
+    expect(plain).not.toContain("MVA");
   });
 
   it("links to the accept page and names the business", () => {

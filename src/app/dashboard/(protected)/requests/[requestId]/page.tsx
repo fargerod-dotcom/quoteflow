@@ -131,7 +131,7 @@ export default async function RequestDetailPage({
           <>
             <QuoteSummary
               lineItems={lineItems}
-              total={Number(quote.total)}
+              vatRate={Number(quote.vatRate)}
               summary={quote.summary}
               estimatedHours={Number(quote.estimatedHours)}
             />
@@ -159,7 +159,7 @@ export default async function RequestDetailPage({
           <form action={saveQuoteEdits} className="flex flex-col gap-5">
             <input type="hidden" name="requestId" value={request.id} />
 
-            <LineItemsEditor initialLineItems={lineItems} />
+            <LineItemsEditor initialLineItems={lineItems} vatRate={Number(quote.vatRate)} />
 
             <div className="grid grid-cols-2 gap-4">
               <div>

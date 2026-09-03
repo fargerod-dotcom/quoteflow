@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { formatCurrency } from "@/lib/utils";
+import { calcTotals } from "@/lib/vat";
 import type { LineItem } from "@/lib/ai/schema";
 
-export function LineItemsEditor({ initialLineItems }: { initialLineItems: LineItem[] }) {
+export function LineItemsEditor({ initialLineItems, vatRate }: { initialLineItems: LineItem[]; vatRate: number }) {
   const [items, setItems] = useState<LineItem[]>(
     initialLineItems.length > 0 ? initialLineItems : [{ description: "", quantity: 1, unitPrice: 0 }]
   );
@@ -23,7 +24,7 @@ export function LineItemsEditor({ initialLineItems }: { initialLineItems: LineIt
     setItems((prev) => [...prev, { description: "", quantity: 1, unitPrice: 0 }]);
   }
 
-  const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const { subtotal, vat, total } = calcTotals(items, vatRate);
 
   return (
     <div className="flex flex-col gap-3">
@@ -87,9 +88,23 @@ export function LineItemsEditor({ initialLineItems }: { initialLineItems: LineIt
         + Add line item
       </Button>
 
-      <div className="flex items-center justify-between border-t border-slate-200 pt-3">
-        <span className="text-sm font-medium text-slate-500">Total</span>
-        <span className="text-xl font-bold text-slate-900">{formatCurrency(total)}</span>
+      <div className="border-t border-slate-200 pt-3 text-sm text-slate-500">
+        {vatRate > 0 && (
+          <>
+            <div className="flex items-center justify-between py-0.5">
+              <span>Subtotal ekskl. mva</span>
+              <span>{formatCurrency(subtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between py-0.5">
+              <span>MVA {vatRate}%</span>
+              <span>{formatCurrency(vat)}</span>
+            </div>
+          </>
+        )}
+        <div className="flex items-center justify-between pt-1">
+          <span className="font-medium">{vatRate > 0 ? "Total inkl. mva" : "Total"}</span>
+          <span className="text-xl font-bold text-slate-900">{formatCurrency(total)}</span>
+        </div>
       </div>
     </div>
   );

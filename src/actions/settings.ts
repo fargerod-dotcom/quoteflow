@@ -8,11 +8,12 @@ export async function updatePrices(formData: FormData): Promise<void> {
   const business = await requireBusiness();
   const hourlyRate = Number(formData.get("hourlyRate") ?? 0);
   const calloutFee = Number(formData.get("calloutFee") ?? 0);
+  const vatRate = Math.min(100, Math.max(0, Number(formData.get("vatRate") ?? 25)));
   const serviceArea = String(formData.get("serviceArea") ?? "").trim() || null;
 
   await prisma.business.update({
     where: { id: business.id },
-    data: { hourlyRate, calloutFee, serviceArea },
+    data: { hourlyRate, calloutFee, vatRate, serviceArea },
   });
 
   revalidatePath("/dashboard/settings");

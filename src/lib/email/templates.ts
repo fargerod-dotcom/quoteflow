@@ -1,3 +1,4 @@
+import { calcTotals } from "@/lib/vat";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { LineItem } from "@/lib/ai/schema";
 
@@ -38,6 +39,7 @@ export function quoteEmailHtml({
   customerName,
   summary,
   lineItems,
+  vatRate,
   total,
   estimatedHours,
   link,
@@ -46,10 +48,26 @@ export function quoteEmailHtml({
   customerName: string;
   summary: string;
   lineItems: LineItem[];
+  /** MVA percentage; 0 hides the MVA breakdown. */
+  vatRate?: number;
   total: number;
   estimatedHours: number;
   link: string;
 }): string {
+  const rate = vatRate ?? 0;
+  const { subtotal, vat } = calcTotals(lineItems, rate);
+  const vatRows =
+    rate > 0
+      ? `
+      <tr>
+        <td style="padding:12px 0 2px;font-size:13px;color:#64748b;">Subtotal ekskl. mva</td>
+        <td align="right" style="padding:12px 0 2px;font-size:13px;color:#64748b;">${formatCurrency(subtotal)}</td>
+      </tr>
+      <tr>
+        <td style="padding:2px 0;font-size:13px;color:#64748b;">MVA ${rate}%</td>
+        <td align="right" style="padding:2px 0;font-size:13px;color:#64748b;">${formatCurrency(vat)}</td>
+      </tr>`
+      : "";
   const rows = lineItems
     .map(
       (li) => `
@@ -70,8 +88,9 @@ export function quoteEmailHtml({
     <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#334155;">${escapeHtml(summary)}</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
       ${rows}
+      ${vatRows}
       <tr>
-        <td style="padding:14px 0 0;font-size:16px;font-weight:700;">Total</td>
+        <td style="padding:${rate > 0 ? "8" : "14"}px 0 0;font-size:16px;font-weight:700;">${rate > 0 ? "Total inkl. mva" : "Total"}</td>
         <td align="right" style="padding:14px 0 0;font-size:20px;font-weight:700;color:#2563eb;">${formatCurrency(total)}</td>
       </tr>
     </table>

@@ -6,6 +6,7 @@ import { requireBusiness } from "@/lib/auth-helpers";
 import { sendSms } from "@/lib/sms/twilio";
 import { sendEmail } from "@/lib/email/resend";
 import { quoteEmailHtml } from "@/lib/email/templates";
+import { calcTotals } from "@/lib/vat";
 import { interpolate, formatCurrency } from "@/lib/utils";
 import { DEFAULT_SMS_TEMPLATE_NEW_QUOTE } from "@/lib/constants";
 import { lineItemSchema } from "@/lib/ai/schema";
@@ -26,11 +27,11 @@ async function loadRequestForBusiness(requestId: string) {
   return { business, request };
 }
 
-function parseLineItems(formData: FormData) {
+function parseLineItems(formData: FormData, vatRate: number) {
   const raw = String(formData.get("lineItems") ?? "[]");
   const parsed = lineItemsArraySchema.safeParse(JSON.parse(raw));
   if (!parsed.success) throw new Error("Line items are invalid.");
-  const total = parsed.data.reduce((sum, li) => sum + li.quantity * li.unitPrice, 0);
+  const { total } = calcTotals(parsed.data, vatRate);
   return { lineItems: parsed.data, total };
 }
 
@@ -55,6 +56,7 @@ async function deliverQuote(business: Business, request: JobRequest, quote: Quot
         customerName: request.customerName,
         summary: quote.summary,
         lineItems: lineItemsArraySchema.parse(quote.lineItems),
+        vatRate: Number(quote.vatRate),
         total,
         estimatedHours: Number(quote.estimatedHours),
         link,
@@ -66,7 +68,7 @@ async function deliverQuote(business: Business, request: JobRequest, quote: Quot
 export async function saveQuoteEdits(formData: FormData): Promise<void> {
   const requestId = String(formData.get("requestId"));
   const { request } = await loadRequestForBusiness(requestId);
-  const { lineItems, total } = parseLineItems(formData);
+  const { lineItems, total } = parseLineItems(formData, Number(request.quote!.vatRate));
   const estimatedHours = Number(formData.get("estimatedHours") ?? request.quote!.estimatedHours);
   const summary = String(formData.get("summary") ?? request.quote!.summary);
 
@@ -81,7 +83,7 @@ export async function saveQuoteEdits(formData: FormData): Promise<void> {
 export async function sendQuote(formData: FormData): Promise<void> {
   const requestId = String(formData.get("requestId"));
   const { business, request } = await loadRequestForBusiness(requestId);
-  const { lineItems, total } = parseLineItems(formData);
+  const { lineItems, total } = parseLineItems(formData, Number(request.quote!.vatRate));
   const estimatedHours = Number(formData.get("estimatedHours") ?? request.quote!.estimatedHours);
   const summary = String(formData.get("summary") ?? request.quote!.summary).trim();
 

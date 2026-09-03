@@ -50,6 +50,23 @@ export default async function SettingsPage() {
             </div>
           </div>
           <div>
+            <Label htmlFor="vatRate">MVA (%)</Label>
+            <Input
+              id="vatRate"
+              name="vatRate"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              inputMode="decimal"
+              defaultValue={Number(business.vatRate)}
+              required
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Your rates and line items are ex-MVA; this is added on top of every quote. Set 0 if you&rsquo;re not MVA-registered.
+            </p>
+          </div>
+          <div>
             <Label htmlFor="serviceArea">Service area</Label>
             <Textarea id="serviceArea" name="serviceArea" rows={2} defaultValue={business.serviceArea ?? ""} />
           </div>
