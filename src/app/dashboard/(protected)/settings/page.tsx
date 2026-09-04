@@ -25,7 +25,7 @@ export default async function SettingsPage() {
         <form action={updatePrices} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="hourlyRate">Hourly rate (kr)</Label>
+              <Label htmlFor="hourlyRate">Hourly rate (kr ekskl. mva)</Label>
               <Input
                 id="hourlyRate"
                 name="hourlyRate"
@@ -37,7 +37,7 @@ export default async function SettingsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="calloutFee">Call-out fee (kr)</Label>
+              <Label htmlFor="calloutFee">Call-out fee (kr ekskl. mva)</Label>
               <Input
                 id="calloutFee"
                 name="calloutFee"

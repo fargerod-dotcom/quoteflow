@@ -88,8 +88,8 @@ model Business {
   trade       Trade  @default(PLUMBING)
   serviceArea String?
 
-  hourlyRate  Decimal @db.Decimal(10, 2)
-  calloutFee  Decimal @db.Decimal(10, 2)
+  hourlyRate  Decimal @default(1150) @db.Decimal(10, 2)
+  calloutFee  Decimal @default(750) @db.Decimal(10, 2)
   /// MVA (VAT) percentage added on top of ex-MVA line items. 0 if not registered.
   vatRate     Decimal @default(25) @db.Decimal(5, 2)
 

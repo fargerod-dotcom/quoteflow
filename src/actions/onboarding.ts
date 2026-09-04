@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth-helpers";
 import { generateUniqueSlug } from "@/lib/slug";
 import { createCheckoutSession } from "@/lib/billing/stripe";
-import { TRIAL_DAYS } from "@/lib/constants";
+import { DEFAULT_CALLOUT_FEE, DEFAULT_HOURLY_RATE, TRIAL_DAYS } from "@/lib/constants";
 import type { Trade } from "@prisma/client";
 
 export async function createBusiness(formData: FormData): Promise<void> {
@@ -15,8 +15,9 @@ export async function createBusiness(formData: FormData): Promise<void> {
   const trade = String(formData.get("trade") ?? "OTHER") as Trade;
   const serviceArea = String(formData.get("serviceArea") ?? "").trim() || null;
   const ownerPhone = String(formData.get("ownerPhone") ?? "").trim();
-  const hourlyRate = Number(formData.get("hourlyRate") ?? 0);
-  const calloutFee = Number(formData.get("calloutFee") ?? 0);
+  // Blank or garbage input falls back to typical Norwegian plumber rates.
+  const hourlyRate = numberOr(formData.get("hourlyRate"), DEFAULT_HOURLY_RATE);
+  const calloutFee = numberOr(formData.get("calloutFee"), DEFAULT_CALLOUT_FEE);
 
   if (!name || !ownerPhone) {
     throw new Error("Business name and phone number are required.");
@@ -48,4 +49,9 @@ export async function createBusiness(formData: FormData): Promise<void> {
   });
 
   redirect(checkout?.url ?? "/dashboard/inbox");
+}
+
+function numberOr(value: FormDataEntryValue | null, fallback: number): number {
+  const n = Number(String(value ?? "").trim());
+  return String(value ?? "").trim() === "" || !Number.isFinite(n) || n < 0 ? fallback : n;
 }

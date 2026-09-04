@@ -2,7 +2,7 @@ import { createBusiness } from "@/actions/onboarding";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select, Textarea } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
-import { TRADES, TRIAL_DAYS } from "@/lib/constants";
+import { DEFAULT_CALLOUT_FEE, DEFAULT_HOURLY_RATE, TRADES, TRIAL_DAYS } from "@/lib/constants";
 
 export default function OnboardingPage() {
   return (
@@ -58,15 +58,35 @@ export default function OnboardingPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="hourlyRate">Hourly rate (kr)</Label>
-              <Input id="hourlyRate" name="hourlyRate" type="number" min="0" step="0.01" inputMode="decimal" required placeholder="950" />
+              <Label htmlFor="hourlyRate">Hourly rate (kr ekskl. mva)</Label>
+              <Input
+                id="hourlyRate"
+                name="hourlyRate"
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                required
+                defaultValue={DEFAULT_HOURLY_RATE}
+              />
             </div>
             <div>
-              <Label htmlFor="calloutFee">Call-out fee (kr)</Label>
-              <Input id="calloutFee" name="calloutFee" type="number" min="0" step="0.01" inputMode="decimal" required placeholder="500" />
+              <Label htmlFor="calloutFee">Call-out fee (kr ekskl. mva)</Label>
+              <Input
+                id="calloutFee"
+                name="calloutFee"
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                required
+                defaultValue={DEFAULT_CALLOUT_FEE}
+              />
             </div>
           </div>
-          <p className="-mt-2 text-xs text-slate-500">You can change these any time in Settings.</p>
+          <p className="-mt-2 text-xs text-slate-500">
+            Pre-filled with typical Norwegian plumber rates. MVA (25%) is added on top of every quote. You can change these any time in Settings.
+          </p>
 
           <Button type="submit" size="lg" className="mt-1">
             Continue to free trial →

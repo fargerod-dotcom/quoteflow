@@ -3,6 +3,10 @@ export const CURRENCY = "NOK";
 export const CURRENCY_LOCALE = "nb-NO";
 /** Country code assumed for phone numbers entered without one. */
 export const DEFAULT_COUNTRY_CODE = "47";
+/** Typical Norwegian plumber rates (ex-MVA, NOK), pre-filled at onboarding. */
+export const DEFAULT_HOURLY_RATE = 1150;
+export const DEFAULT_CALLOUT_FEE = 750;
+export const DEFAULT_VAT_RATE = 25;
 
 export const TRADES = [
   { value: "PLUMBING", label: "Plumbing" },
