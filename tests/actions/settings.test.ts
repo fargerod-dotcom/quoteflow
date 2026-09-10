@@ -10,7 +10,7 @@ vi.mock("@/lib/prisma", () => ({ prisma: { business: { update } } }));
 vi.mock("@/lib/auth-helpers", () => ({ requireBusiness }));
 vi.mock("next/cache", () => ({ revalidatePath }));
 
-import { updatePrices, updateSmsTemplates } from "@/actions/settings";
+import { updatePrices, updateSmsTemplates, updateOwnerPhone } from "@/actions/settings";
 
 function formData(fields: Record<string, string>) {
   const fd = new FormData();
@@ -20,7 +20,7 @@ function formData(fields: Record<string, string>) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  requireBusiness.mockResolvedValue({ id: "biz-1" });
+  requireBusiness.mockResolvedValue({ id: "biz-1", country: "NO" });
 });
 
 describe("updatePrices", () => {
@@ -78,5 +78,23 @@ describe("updateSmsTemplates", () => {
       where: { id: "biz-1" },
       data: { smsTemplateNewQuote: null, smsTemplateFollowUp: null, smsTemplateConfirmation: null },
     });
+  });
+});
+
+describe("updateOwnerPhone", () => {
+  it("stores a Norwegian mobile normalised to E.164", async () => {
+    const state = await updateOwnerPhone({ error: null }, formData({ ownerPhone: "980 53 546" }));
+
+    expect(state).toEqual({ error: null, saved: true });
+    expect(update).toHaveBeenCalledWith({ where: { id: "biz-1" }, data: { ownerPhone: "+4798053546" } });
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/settings");
+  });
+
+  it("refuses a landline or a foreign number without writing", async () => {
+    for (const ownerPhone of ["22 33 44 55", "5551234567", "not a number", ""]) {
+      const state = await updateOwnerPhone({ error: null }, formData({ ownerPhone }));
+      expect(state.error).toMatch(/mobile number in Norge/);
+    }
+    expect(update).not.toHaveBeenCalled();
   });
 });

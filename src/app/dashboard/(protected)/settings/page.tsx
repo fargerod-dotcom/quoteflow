@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { ShareLinkCard } from "@/components/request/ShareLinkCard";
+import { OwnerPhoneForm } from "@/components/settings/OwnerPhoneForm";
 import { countryOf } from "@/lib/countries";
 import { t } from "@/lib/i18n";
 
@@ -12,13 +13,18 @@ export default async function SettingsPage() {
   const business = await requireBusiness();
   // Labels and currency follow the business's country; the defaults shown for
   // the SMS templates are the customer-facing ones, so they follow its language.
-  const { currency, tax, lang } = countryOf(business.country);
+  const { code: country, currency, tax, lang } = countryOf(business.country);
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold tracking-tight text-slate-900">Settings</h1>
 
       <ShareLinkCard url={`${process.env.NEXT_PUBLIC_APP_URL}/r/${business.slug}`} />
+
+      <Card className="p-5">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Contact</h2>
+        <OwnerPhoneForm current={business.ownerPhone} country={country} />
+      </Card>
 
       <Card className="p-5">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Pricing & service area</h2>
