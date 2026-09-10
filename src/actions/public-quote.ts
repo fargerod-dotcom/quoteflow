@@ -37,8 +37,9 @@ export async function acceptQuote(formData: FormData): Promise<void> {
     { businessName: business.name, scheduledDate: formatDate(scheduledDate) }
   );
 
-  await sendSms({ to: quote.request.customerPhone, body: confirmationBody });
+  await sendSms({ businessId: business.id, to: quote.request.customerPhone, body: confirmationBody });
   await sendSms({
+    businessId: business.id,
     to: business.ownerPhone,
     body: `✅ ${quote.request.customerName} accepted ${formatCurrency(quote.total)} for ${formatDate(scheduledDate)} — ${quote.request.customerAddress}. ${process.env.NEXT_PUBLIC_APP_URL}/dashboard/calendar`,
   });
@@ -76,6 +77,7 @@ export async function declineQuote(formData: FormData): Promise<void> {
   await prisma.request.update({ where: { id: quote.requestId }, data: { status: "DECLINED" } });
 
   await sendSms({
+    businessId: quote.request.business.id,
     to: quote.request.business.ownerPhone,
     body: `${quote.request.customerName} declined the ${formatCurrency(quote.total)} quote (${quote.request.customerAddress}). ${process.env.NEXT_PUBLIC_APP_URL}/dashboard/requests/${quote.requestId}`,
   });

@@ -1,4 +1,4 @@
-import { createBusiness } from "@/actions/onboarding";
+import { OnboardingForm } from "@/components/onboarding/OnboardingForm";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select, Textarea } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
@@ -17,7 +17,7 @@ export default function OnboardingPage() {
           Two minutes. The AI uses your rates to draft every quote, and you get your public link right after.
         </p>
 
-        <form action={createBusiness} className="mt-6 flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <OnboardingForm className="mt-6 flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
             <Label htmlFor="name">Business name</Label>
             <Input id="name" name="name" required placeholder="Joe's Plumbing" autoComplete="organization" />
@@ -49,10 +49,10 @@ export default function OnboardingPage() {
               inputMode="tel"
               required
               autoComplete="tel"
-              placeholder="(555) 123-4567"
+              placeholder="980 53 546"
             />
             <p className="mt-1 text-xs text-slate-500">
-              We text you here the moment a request comes in. Norwegian numbers can be entered as 8 digits; otherwise start with your country code.
+              We text you here the moment a request comes in. Norwegian mobile numbers only for now (8 digits).
             </p>
           </div>
 
@@ -94,7 +94,7 @@ export default function OnboardingPage() {
           <p className="text-center text-xs text-slate-500">
             Next: add a card to start your {TRIAL_DAYS}-day trial. You won&rsquo;t be charged until it ends.
           </p>
-        </form>
+        </OnboardingForm>
       </div>
     </div>
   );

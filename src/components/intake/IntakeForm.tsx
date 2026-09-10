@@ -1,7 +1,7 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
-import { createRequest } from "@/actions/requests";
+import { useFormState, useFormStatus } from "react-dom";
+import { submitRequest, type IntakeState } from "@/actions/requests";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea } from "@/components/ui/Input";
 import { PhotoUploader } from "@/components/intake/PhotoUploader";
@@ -43,10 +43,16 @@ function todayIso(): string {
 
 export function IntakeForm({ slug, businessName }: { slug: string; businessName: string }) {
   const min = todayIso();
+  const [state, formAction] = useFormState<IntakeState, FormData>(submitRequest, { error: null });
 
   return (
-    <form action={createRequest} className="flex flex-col gap-8">
+    <form action={formAction} className="flex flex-col gap-8">
       <input type="hidden" name="slug" value={slug} />
+      {/* Honeypot — hidden from people, filled in by bots. Server drops those silently. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="website">Website</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
 
       <section>
         <SectionHeading n={1} title="What needs doing?" hint="The more detail, the more accurate the quote." />
@@ -110,6 +116,11 @@ export function IntakeForm({ slug, businessName }: { slug: string; businessName:
       </section>
 
       <div>
+        {state.error && (
+          <p role="alert" className="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {state.error}
+          </p>
+        )}
         <SubmitButton />
         <p className="mt-3 text-center text-xs text-slate-500">
           {businessName} will review your request and text you a quote. No commitment until you accept.

@@ -37,7 +37,7 @@ const VALID_FIELDS = {
   name: "Joe's Plumbing",
   trade: "PLUMBING",
   serviceArea: "Springfield",
-  ownerPhone: "5551234567",
+  ownerPhone: "980 53 546",
   hourlyRate: "95",
   calloutFee: "49",
 };
@@ -54,6 +54,16 @@ describe("createBusiness", () => {
   it("throws when name or phone is missing", async () => {
     await expect(createBusiness(formData({ ...VALID_FIELDS, name: "" }))).rejects.toThrow(
       /required/i
+    );
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it("rejects an owner phone that isn't a Norwegian mobile", async () => {
+    await expect(createBusiness(formData({ ...VALID_FIELDS, ownerPhone: "5551234567" }))).rejects.toThrow(
+      /Norwegian mobile number/
+    );
+    await expect(createBusiness(formData({ ...VALID_FIELDS, ownerPhone: "22 33 44 55" }))).rejects.toThrow(
+      /Norwegian mobile number/
     );
     expect(create).not.toHaveBeenCalled();
   });
@@ -75,7 +85,8 @@ describe("createBusiness", () => {
     const created = create.mock.calls[0][0].data;
     expect(created.name).toBe("Joe's Plumbing");
     expect(created.slug).toBe("joes-plumbing");
-    expect(created.ownerPhone).toBe("5551234567");
+    // Stored normalised so SMS policy and Twilio both get E.164.
+    expect(created.ownerPhone).toBe("+4798053546");
     expect(created.hourlyRate).toBe(95);
     expect(created.calloutFee).toBe(49);
 

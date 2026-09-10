@@ -2,11 +2,14 @@
 
 import { File as NodeFile } from "node:buffer";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect";
 import { prisma } from "@/lib/prisma";
 import { uploadPhoto } from "@/lib/storage/blob";
 import { draftQuote, type PhotoInput } from "@/lib/ai/claude-client";
 import { sendSms } from "@/lib/sms/twilio";
 import { sendEmail } from "@/lib/email/resend";
+import { logError } from "@/lib/errors";
+import { clientIpHash, intakeAllowed, RATE_LIMIT_MESSAGE } from "@/lib/rate-limit";
 import { calcTotals } from "@/lib/vat";
 import { ownerNewRequestEmailHtml } from "@/lib/email/templates";
 import { interpolate } from "@/lib/utils";
@@ -23,10 +26,41 @@ const CONFIDENCE_MAP: Record<string, QuoteConfidence> = {
 // node:buffer's implementation so file uploads work on older runtimes too.
 const FileCtor: typeof File = (globalThis.File ?? NodeFile) as typeof File;
 
+export type IntakeState = { error: string | null };
+
+/**
+ * Form-state wrapper for the intake form: turns the validation/abuse errors
+ * `createRequest` throws into a message the customer can actually read.
+ * (In production Next masks thrown server-action errors behind a generic
+ * "application error" page.) Redirects pass straight through.
+ */
+export async function submitRequest(_prev: IntakeState, formData: FormData): Promise<IntakeState> {
+  try {
+    await createRequest(formData);
+    return { error: null };
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    return { error: err instanceof Error ? err.message : "Something went wrong. Please try again." };
+  }
+}
+
 export async function createRequest(formData: FormData): Promise<void> {
   const slug = String(formData.get("slug") ?? "");
   const business = await prisma.business.findUnique({ where: { slug } });
   if (!business) throw new Error("This booking link is no longer valid.");
+
+  // Honeypot: real users never see the "website" field, bots fill it in.
+  // Pretend it worked so the bot has nothing to learn from.
+  if (String(formData.get("website") ?? "").trim()) {
+    await logError("intake.honeypot", "Honeypot field filled", { slug });
+    redirect(`/r/${slug}/thanks`);
+  }
+
+  const ipHash = clientIpHash();
+  if (!(await intakeAllowed(business.id, ipHash))) {
+    await logError("intake.rate_limit", "Intake rate limit hit", { slug, ipHash });
+    throw new Error(RATE_LIMIT_MESSAGE);
+  }
 
   const description = String(formData.get("description") ?? "").trim();
   const customerName = String(formData.get("customerName") ?? "").trim();
@@ -73,6 +107,7 @@ export async function createRequest(formData: FormData): Promise<void> {
       customerEmail,
       customerAddress,
       preferredDates,
+      ipHash,
     },
   });
 
@@ -129,6 +164,7 @@ export async function createRequest(formData: FormData): Promise<void> {
 
   const reviewLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/requests/${request.id}`;
   await sendSms({
+    businessId: business.id,
     to: business.ownerPhone,
     body: interpolate(OWNER_NEW_REQUEST_SMS, { customerName, customerAddress, link: reviewLink }),
   });

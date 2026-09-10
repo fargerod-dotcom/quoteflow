@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       link,
     });
 
-    await sendSms({ to: customerPhone, body });
+    await sendSms({ businessId: business.id, to: customerPhone, body });
     await prisma.quote.update({ where: { id: quote.id }, data: { followUpSentAt: new Date() } });
     sent += 1;
   }

@@ -111,6 +111,7 @@ model Business {
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   requests Request[]
+  smsLogs  SmsLog[]
 
   @@index([slug])
 }
@@ -133,6 +134,8 @@ model Request {
   customerEmail   String?
   customerAddress String
   preferredDates  DateTime[]
+  /// Salted hash of the submitter's IP, kept only for rate limiting.
+  ipHash          String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -209,4 +212,16 @@ model ErrorLog {
   createdAt DateTime @default(now())
 
   @@index([source, createdAt])
+}
+
+/// One row per outbound SMS, used to enforce the per-business monthly ceiling.
+model SmsLog {
+  id         String   @id @default(cuid())
+  businessId String
+  to         String
+  createdAt  DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, createdAt])
 }

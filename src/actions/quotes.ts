@@ -46,7 +46,7 @@ async function deliverQuote(business: Business, request: JobRequest, quote: Quot
     link,
   });
 
-  await sendSms({ to: request.customerPhone, body: smsBody });
+  await sendSms({ businessId: business.id, to: request.customerPhone, body: smsBody });
   if (request.customerEmail) {
     await sendEmail({
       to: request.customerEmail,
