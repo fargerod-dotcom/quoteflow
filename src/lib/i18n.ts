@@ -202,7 +202,7 @@ const nb: Record<MessageKey, string> = {
   "thanks.body": "{business} har fått opplysningene dine. Følg med på telefonen.",
   "thanks.businessFallback": "bedriften",
   "thanks.step1When": "Nå",
-  "thanks.step1What": "Forespørselen er kommet fram. De får en SMS med en gang.",
+  "thanks.step1What": "Forespørselen er levert. Bedriften får en SMS med en gang.",
   "thanks.step2When": "Snart",
   "thanks.step3When": "Så",
   "thanks.step2What": "Du får en SMS – og en e-post hvis du oppga adresse – med lenke til tilbudet.",
@@ -242,7 +242,7 @@ const nb: Record<MessageKey, string> = {
   "quote.totalInclTax": "Total inkl. {tax}",
 
   "error.linkInvalid": "Denne bestillingslenken er ikke gyldig lenger.",
-  "error.missingFields": "Fyll ut alle feltene som må fylles ut, og velg minst én ønsket dato.",
+  "error.missingFields": "Fyll ut alle obligatoriske felter, og velg minst én ønsket dato.",
   "error.photoTooLarge": "Bildet «{name}» er for stort – bruk bilder under 8 MB.",
   "error.rateLimit":
     "Det har kommet for mange forespørsler fra denne tilkoblingen akkurat nå. Prøv igjen om en time, eller ring bedriften direkte.",
