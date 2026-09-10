@@ -1,6 +1,6 @@
 import { Decimal } from "@prisma/client/runtime/library";
 
-import { CURRENCY, CURRENCY_LOCALE, DEFAULT_COUNTRY_CODE } from "@/lib/constants";
+import { CURRENCY, CURRENCY_LOCALE } from "@/lib/constants";
 
 /** Formats an amount in the app currency, e.g. 1234.5 → "1 234,50 kr". */
 export function formatCurrency(value: number | string | Decimal): string {
@@ -9,32 +9,6 @@ export function formatCurrency(value: number | string | Decimal): string {
     style: "currency",
     currency: CURRENCY,
   }).format(num);
-}
-
-/** Pretty-prints a phone number for display: Norwegian 8-digit numbers as
- * "412 34 567" (with the +47 kept if given); anything else is returned as typed. */
-export function formatPhone(raw: string): string {
-  const trimmed = raw.trim();
-  const digits = trimmed.replace(/\D/g, "");
-  const national = digits.length === 10 && digits.startsWith(DEFAULT_COUNTRY_CODE) ? digits.slice(2) : digits;
-  if (national.length === 8) {
-    const pretty = `${national.slice(0, 3)} ${national.slice(3, 5)} ${national.slice(5)}`;
-    return national === digits ? pretty : `+${DEFAULT_COUNTRY_CODE} ${pretty}`;
-  }
-  return trimmed;
-}
-
-/** Normalizes a phone number to E.164 for Twilio. Handles a leading "+" or the
- * "00" international dialing prefix; a bare 8-digit number is assumed to be
- * Norwegian (+47). Best-effort, not full E.164 validation. */
-export function toE164(raw: string): string {
-  const trimmed = raw.trim();
-  if (trimmed.startsWith("+")) return `+${trimmed.replace(/\D/g, "")}`;
-  if (trimmed.startsWith("00")) return `+${trimmed.replace(/\D/g, "").slice(2)}`;
-  const digits = trimmed.replace(/\D/g, "");
-  if (digits.length === 8) return `+${DEFAULT_COUNTRY_CODE}${digits}`;
-  if (digits.length === 10 && digits.startsWith(DEFAULT_COUNTRY_CODE)) return `+${digits}`;
-  return `+${digits}`;
 }
 
 export function formatDate(date: Date | string): string {

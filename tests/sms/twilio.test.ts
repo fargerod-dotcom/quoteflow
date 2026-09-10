@@ -48,7 +48,7 @@ describe("sendSms", () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     const { sendSms } = await import("@/lib/sms/twilio");
-    const result = await sendSms({ businessId: BIZ, to: "+4798053546", body: "hello" });
+    const result = await sendSms({ businessId: BIZ, country: "NO", to: "+4798053546", body: "hello" });
 
     expect(result).toEqual({ sent: false, reason: "not_configured" });
     expect(twilioConstructor).not.toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe("sendSms", () => {
     configureTwilio();
 
     const { sendSms } = await import("@/lib/sms/twilio");
-    const result = await sendSms({ businessId: BIZ, to: "980 53 546", body: "hi there" });
+    const result = await sendSms({ businessId: BIZ, country: "NO", to: "980 53 546", body: "hi there" });
 
     expect(result.sent).toBe(true);
     expect(twilioConstructor).toHaveBeenCalledWith("ACxxxx", "authtoken");
@@ -79,7 +79,7 @@ describe("sendSms", () => {
     messagesCreate.mockRejectedValueOnce(new Error("Twilio is down"));
 
     const { sendSms } = await import("@/lib/sms/twilio");
-    await expect(sendSms({ businessId: BIZ, to: "+4741234567", body: "hi" })).resolves.toEqual({
+    await expect(sendSms({ businessId: BIZ, country: "NO", to: "+4741234567", body: "hi" })).resolves.toEqual({
       sent: false,
       reason: "error",
     });
@@ -90,7 +90,7 @@ describe("sendSms", () => {
     configureTwilio();
 
     const { sendSms } = await import("@/lib/sms/twilio");
-    const result = await sendSms({ businessId: BIZ, to: "+15551234567", body: "hi" });
+    const result = await sendSms({ businessId: BIZ, country: "NO", to: "+15551234567", body: "hi" });
 
     expect(result).toEqual({ sent: false, reason: "blocked_destination" });
     expect(twilioConstructor).not.toHaveBeenCalled();
@@ -103,7 +103,7 @@ describe("sendSms", () => {
     getMonthlySmsCount.mockResolvedValue(300);
 
     const { sendSms } = await import("@/lib/sms/twilio");
-    const result = await sendSms({ businessId: BIZ, to: "+4798053546", body: "hi" });
+    const result = await sendSms({ businessId: BIZ, country: "NO", to: "+4798053546", body: "hi" });
 
     expect(result).toEqual({ sent: false, reason: "ceiling_reached" });
     expect(messagesCreate).not.toHaveBeenCalled();
@@ -114,11 +114,11 @@ describe("sendSms", () => {
     const { sendSms } = await import("@/lib/sms/twilio");
 
     getMonthlySmsCount.mockResolvedValue(238);
-    await sendSms({ businessId: BIZ, to: "+4798053546", body: "hi" });
+    await sendSms({ businessId: BIZ, country: "NO", to: "+4798053546", body: "hi" });
     expect(notifyOwnerNearCeiling).not.toHaveBeenCalled();
 
     getMonthlySmsCount.mockResolvedValue(239);
-    await sendSms({ businessId: BIZ, to: "+4798053546", body: "hi" });
+    await sendSms({ businessId: BIZ, country: "NO", to: "+4798053546", body: "hi" });
     expect(notifyOwnerNearCeiling).toHaveBeenCalledWith(BIZ, 240);
   });
 });

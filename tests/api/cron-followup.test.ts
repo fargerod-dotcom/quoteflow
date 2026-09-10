@@ -74,6 +74,8 @@ describe("cron follow-up route", () => {
     expect(json).toEqual({ checked: 2, sent: 2 });
     expect(sendSms).toHaveBeenCalledTimes(2);
     expect(sendSms).toHaveBeenCalledWith({
+      businessId: undefined,
+      country: "NO",
       to: "+15559876543",
       body: "Reminder for Bob: https://app.test/q/token-2",
     });

@@ -8,6 +8,7 @@ import { sendEmail } from "@/lib/email/resend";
 import { quoteEmailHtml } from "@/lib/email/templates";
 import { calcTotals } from "@/lib/vat";
 import { interpolate, formatCurrency } from "@/lib/utils";
+import { countryOf } from "@/lib/countries";
 import { DEFAULT_SMS_TEMPLATE_NEW_QUOTE } from "@/lib/constants";
 import { lineItemSchema } from "@/lib/ai/schema";
 import { z } from "zod";
@@ -37,6 +38,7 @@ function parseLineItems(formData: FormData, vatRate: number) {
 
 /** Texts (and emails, if we have an address) the customer their quote link. */
 async function deliverQuote(business: Business, request: JobRequest, quote: Quote) {
+  const { code: country } = countryOf(business.country);
   const link = `${process.env.NEXT_PUBLIC_APP_URL}/q/${quote.acceptToken}`;
   const total = Number(quote.total);
   const smsBody = interpolate(business.smsTemplateNewQuote ?? DEFAULT_SMS_TEMPLATE_NEW_QUOTE, {
@@ -46,7 +48,7 @@ async function deliverQuote(business: Business, request: JobRequest, quote: Quot
     link,
   });
 
-  await sendSms({ businessId: business.id, to: request.customerPhone, body: smsBody });
+  await sendSms({ businessId: business.id, country, to: request.customerPhone, body: smsBody });
   if (request.customerEmail) {
     await sendEmail({
       to: request.customerEmail,

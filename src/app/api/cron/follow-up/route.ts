@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendSms } from "@/lib/sms/twilio";
 import { interpolate } from "@/lib/utils";
+import { countryOf } from "@/lib/countries";
 import { DEFAULT_SMS_TEMPLATE_FOLLOW_UP, FOLLOW_UP_HOURS } from "@/lib/constants";
 
 export async function GET(request: Request) {
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
       link,
     });
 
-    await sendSms({ businessId: business.id, to: customerPhone, body });
+    await sendSms({ businessId: business.id, country: countryOf(business.country).code, to: customerPhone, body });
     await prisma.quote.update({ where: { id: quote.id }, data: { followUpSentAt: new Date() } });
     sent += 1;
   }

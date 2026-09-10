@@ -1,40 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toE164, formatPhone, formatCurrency, timeAgo, telHref, mapsHref, googleCalendarHref } from "@/lib/utils";
-
-describe("toE164", () => {
-  it("passes through an already-E.164 number unchanged", () => {
-    expect(toE164("+4798053546")).toBe("+4798053546");
-    expect(toE164("+15551234567")).toBe("+15551234567");
-  });
-
-  it("adds +47 to a bare 8-digit Norwegian number", () => {
-    expect(toE164("98053546")).toBe("+4798053546");
-    expect(toE164("980 53 546")).toBe("+4798053546");
-  });
-
-  it("adds + to a 10-digit number already starting with 47", () => {
-    expect(toE164("4798053546")).toBe("+4798053546");
-  });
-
-  it("converts the 00 international dialing prefix to +", () => {
-    expect(toE164("004798053546")).toBe("+4798053546");
-  });
-
-  it("handles 00-prefixed numbers with formatting characters", () => {
-    expect(toE164("00 47 980 53 546")).toBe("+4798053546");
-  });
-});
-
-describe("formatPhone", () => {
-  it("groups Norwegian numbers as 3-2-3", () => {
-    expect(formatPhone("98053546")).toBe("980 53 546");
-    expect(formatPhone("+4798053546")).toBe("+47 980 53 546");
-  });
-
-  it("leaves other numbers as typed", () => {
-    expect(formatPhone("+1 555 123 4567")).toBe("+1 555 123 4567");
-  });
-});
+import { formatCurrency, formatDate, timeAgo, telHref, mapsHref, googleCalendarHref } from "@/lib/utils";
 
 describe("formatCurrency", () => {
   it("formats in Norwegian kroner", () => {

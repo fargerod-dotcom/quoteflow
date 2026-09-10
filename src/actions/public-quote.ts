@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/email/resend";
 import { bookingConfirmedEmailHtml } from "@/lib/email/templates";
 import { interpolate, formatDate, formatCurrency, googleCalendarHref } from "@/lib/utils";
 import { DEFAULT_SMS_TEMPLATE_CONFIRMATION } from "@/lib/constants";
+import { countryOf } from "@/lib/countries";
 
 async function loadSentQuote(acceptToken: string) {
   const quote = await prisma.quote.findUnique({
@@ -32,14 +33,16 @@ export async function acceptQuote(formData: FormData): Promise<void> {
   await prisma.request.update({ where: { id: quote.requestId }, data: { status: "ACCEPTED" } });
 
   const business = quote.request.business;
+  const { code: country } = countryOf(business.country);
   const confirmationBody = interpolate(
     business.smsTemplateConfirmation ?? DEFAULT_SMS_TEMPLATE_CONFIRMATION,
     { businessName: business.name, scheduledDate: formatDate(scheduledDate) }
   );
 
-  await sendSms({ businessId: business.id, to: quote.request.customerPhone, body: confirmationBody });
+  await sendSms({ businessId: business.id, country, to: quote.request.customerPhone, body: confirmationBody });
   await sendSms({
     businessId: business.id,
+    country,
     to: business.ownerPhone,
     body: `✅ ${quote.request.customerName} accepted ${formatCurrency(quote.total)} for ${formatDate(scheduledDate)} — ${quote.request.customerAddress}. ${process.env.NEXT_PUBLIC_APP_URL}/dashboard/calendar`,
   });
@@ -78,6 +81,7 @@ export async function declineQuote(formData: FormData): Promise<void> {
 
   await sendSms({
     businessId: quote.request.business.id,
+    country: countryOf(quote.request.business.country).code,
     to: quote.request.business.ownerPhone,
     body: `${quote.request.customerName} declined the ${formatCurrency(quote.total)} quote (${quote.request.customerAddress}). ${process.env.NEXT_PUBLIC_APP_URL}/dashboard/requests/${quote.requestId}`,
   });

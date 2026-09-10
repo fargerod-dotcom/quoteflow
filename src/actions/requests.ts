@@ -13,6 +13,7 @@ import { clientIpHash, intakeAllowed, RATE_LIMIT_MESSAGE } from "@/lib/rate-limi
 import { calcTotals } from "@/lib/vat";
 import { ownerNewRequestEmailHtml } from "@/lib/email/templates";
 import { interpolate } from "@/lib/utils";
+import { countryOf } from "@/lib/countries";
 import { OWNER_NEW_REQUEST_SMS, MAX_PHOTOS, MAX_PHOTO_BYTES } from "@/lib/constants";
 import type { QuoteConfidence } from "@prisma/client";
 
@@ -48,6 +49,7 @@ export async function createRequest(formData: FormData): Promise<void> {
   const slug = String(formData.get("slug") ?? "");
   const business = await prisma.business.findUnique({ where: { slug } });
   if (!business) throw new Error("This booking link is no longer valid.");
+  const { code: country } = countryOf(business.country);
 
   // Honeypot: real users never see the "website" field, bots fill it in.
   // Pretend it worked so the bot has nothing to learn from.
@@ -165,6 +167,7 @@ export async function createRequest(formData: FormData): Promise<void> {
   const reviewLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/requests/${request.id}`;
   await sendSms({
     businessId: business.id,
+    country,
     to: business.ownerPhone,
     body: interpolate(OWNER_NEW_REQUEST_SMS, { customerName, customerAddress, link: reviewLink }),
   });

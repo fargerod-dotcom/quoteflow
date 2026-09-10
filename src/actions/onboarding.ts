@@ -2,13 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect";
-import { toE164 } from "@/lib/utils";
+import { toE164 } from "@/lib/phone";
 import { isAllowedSmsDestination } from "@/lib/sms/policy";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth-helpers";
 import { generateUniqueSlug } from "@/lib/slug";
 import { createCheckoutSession } from "@/lib/billing/stripe";
-import { DEFAULT_CALLOUT_FEE, DEFAULT_HOURLY_RATE, TRIAL_DAYS } from "@/lib/constants";
+import { TRIAL_DAYS } from "@/lib/constants";
+import { countryOf, DEFAULT_COUNTRY } from "@/lib/countries";
 import type { Trade } from "@prisma/client";
 
 export type OnboardingState = { error: string | null };
@@ -31,16 +32,19 @@ export async function createBusiness(formData: FormData): Promise<void> {
   const trade = String(formData.get("trade") ?? "OTHER") as Trade;
   const serviceArea = String(formData.get("serviceArea") ?? "").trim() || null;
   const ownerPhoneRaw = String(formData.get("ownerPhone") ?? "").trim();
-  // Blank or garbage input falls back to typical Norwegian plumber rates.
-  const hourlyRate = numberOr(formData.get("hourlyRate"), DEFAULT_HOURLY_RATE);
-  const calloutFee = numberOr(formData.get("calloutFee"), DEFAULT_CALLOUT_FEE);
+  // No selector at launch: the form posts a hidden "NO". countryOf() keeps a
+  // garbage value from turning into a business that cannot be priced.
+  const { code: country, defaults, tax } = countryOf(String(formData.get("country") ?? DEFAULT_COUNTRY));
+  // Blank or garbage input falls back to the registry's rates for the country.
+  const hourlyRate = numberOr(formData.get("hourlyRate"), defaults.hourlyRate);
+  const calloutFee = numberOr(formData.get("calloutFee"), defaults.calloutFee);
 
   if (!name || !ownerPhoneRaw) {
     throw new Error("Business name and phone number are required.");
   }
   // Stored normalised so every SMS goes to a number the policy will actually deliver to.
-  const ownerPhone = toE164(ownerPhoneRaw);
-  if (!isAllowedSmsDestination(ownerPhone)) {
+  const ownerPhone = toE164(ownerPhoneRaw, country);
+  if (!ownerPhone || !isAllowedSmsDestination(ownerPhone, country)) {
     throw new Error("Please enter a Norwegian mobile number (8 digits starting with 4 or 9) — that's where new requests are texted.");
   }
 
@@ -57,9 +61,11 @@ export async function createBusiness(formData: FormData): Promise<void> {
       slug,
       trade,
       serviceArea,
+      country,
       ownerPhone,
       hourlyRate,
       calloutFee,
+      vatRate: tax.defaultRate,
       trialEndsAt,
     },
   });
