@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { format, isSameDay, isToday } from "date-fns";
 import { cn, formatCurrency } from "@/lib/utils";
+import type { CountryCode } from "@/lib/countries";
 import type { Quote, Request as JobRequest } from "@prisma/client";
 
 type Job = Quote & { request: JobRequest };
 
-export function WeekView({ days, jobs }: { days: Date[]; jobs: Job[] }) {
+export function WeekView({ days, jobs, country }: { days: Date[]; jobs: Job[]; country: CountryCode }) {
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-7">
       {days.map((day) => {
@@ -38,7 +39,7 @@ export function WeekView({ days, jobs }: { days: Date[]; jobs: Job[] }) {
                 >
                   <p className="font-semibold text-slate-900">{job.request.customerName}</p>
                   <p className="truncate text-slate-600">{job.request.customerAddress}</p>
-                  <p className="mt-0.5 font-medium text-green-800">{formatCurrency(job.total)}</p>
+                  <p className="mt-0.5 font-medium text-green-800">{formatCurrency(job.total, country)}</p>
                 </Link>
               ))}
             </div>

@@ -9,11 +9,12 @@ import { draftQuote, type PhotoInput } from "@/lib/ai/claude-client";
 import { sendSms } from "@/lib/sms/twilio";
 import { sendEmail } from "@/lib/email/resend";
 import { logError } from "@/lib/errors";
-import { clientIpHash, intakeAllowed, RATE_LIMIT_MESSAGE } from "@/lib/rate-limit";
+import { clientIpHash, intakeAllowed } from "@/lib/rate-limit";
 import { calcTotals } from "@/lib/vat";
 import { ownerNewRequestEmailHtml } from "@/lib/email/templates";
 import { interpolate } from "@/lib/utils";
-import { countryOf } from "@/lib/countries";
+import { countryOf, DEFAULT_COUNTRY } from "@/lib/countries";
+import { t } from "@/lib/i18n";
 import { OWNER_NEW_REQUEST_SMS, MAX_PHOTOS, MAX_PHOTO_BYTES } from "@/lib/constants";
 import type { QuoteConfidence } from "@prisma/client";
 
@@ -41,15 +42,17 @@ export async function submitRequest(_prev: IntakeState, formData: FormData): Pro
     return { error: null };
   } catch (err) {
     if (isRedirectError(err)) throw err;
-    return { error: err instanceof Error ? err.message : "Something went wrong. Please try again." };
+    // createRequest's own errors are already in the business's language; only
+    // the unexpected ones land here, so the default country's will do.
+    return { error: err instanceof Error ? err.message : t("error.generic", countryOf(DEFAULT_COUNTRY).lang) };
   }
 }
 
 export async function createRequest(formData: FormData): Promise<void> {
   const slug = String(formData.get("slug") ?? "");
   const business = await prisma.business.findUnique({ where: { slug } });
-  if (!business) throw new Error("This booking link is no longer valid.");
-  const { code: country } = countryOf(business.country);
+  const { code: country, lang, currency } = countryOf(business?.country);
+  if (!business) throw new Error(t("error.linkInvalid", lang));
 
   // Honeypot: real users never see the "website" field, bots fill it in.
   // Pretend it worked so the bot has nothing to learn from.
@@ -61,7 +64,7 @@ export async function createRequest(formData: FormData): Promise<void> {
   const ipHash = clientIpHash();
   if (!(await intakeAllowed(business.id, ipHash))) {
     await logError("intake.rate_limit", "Intake rate limit hit", { slug, ipHash });
-    throw new Error(RATE_LIMIT_MESSAGE);
+    throw new Error(t("error.rateLimit", lang));
   }
 
   const description = String(formData.get("description") ?? "").trim();
@@ -82,7 +85,7 @@ export async function createRequest(formData: FormData): Promise<void> {
     !customerAddress ||
     preferredDates.length === 0
   ) {
-    throw new Error("Please fill in all required fields and pick at least one preferred date.");
+    throw new Error(t("error.missingFields", lang));
   }
 
   const photoFiles = formData
@@ -92,7 +95,7 @@ export async function createRequest(formData: FormData): Promise<void> {
 
   for (const file of photoFiles) {
     if (file.size > MAX_PHOTO_BYTES) {
-      throw new Error(`Photo "${file.name}" is too large — please use photos under 8MB.`);
+      throw new Error(t("error.photoTooLarge", lang, { name: file.name }));
     }
   }
 
@@ -138,6 +141,7 @@ export async function createRequest(formData: FormData): Promise<void> {
         mediaType: (file.type || "image/jpeg") as PhotoInput["mediaType"],
       })),
       requestId: request.id,
+      country,
     }),
   ]);
 
@@ -157,6 +161,7 @@ export async function createRequest(formData: FormData): Promise<void> {
       estimatedHours: aiResult.draft.estimatedHours,
       total: totals.total,
       vatRate: business.vatRate,
+      currency,
       summary: aiResult.draft.summary,
       confidence: CONFIDENCE_MAP[aiResult.draft.confidence],
       aiRawResponse: aiResult.raw ? { text: String(aiResult.raw) } : undefined,
@@ -180,6 +185,7 @@ export async function createRequest(formData: FormData): Promise<void> {
       to: ownerEmail,
       subject: `New job request: ${customerName} — ${customerAddress}`,
       html: ownerNewRequestEmailHtml({
+        country,
         businessName: business.name,
         customerName,
         address: customerAddress,

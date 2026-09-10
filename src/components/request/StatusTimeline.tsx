@@ -1,19 +1,31 @@
 import { cn, formatDate, timeAgo } from "@/lib/utils";
+import type { CountryCode, Lang } from "@/lib/countries";
 import type { Quote, Request as JobRequest } from "@prisma/client";
 
 /** Horizontal Received → Quoted → Booked strip for the request detail page. */
-export function StatusTimeline({ request, quote }: { request: JobRequest; quote: Quote }) {
+export function StatusTimeline({
+  request,
+  quote,
+  country,
+  lang,
+}: {
+  request: JobRequest;
+  quote: Quote;
+  country: CountryCode;
+  /** Owner-facing, so "en" for now. */
+  lang: Lang;
+}) {
   const declined = request.status === "DECLINED";
   const steps = [
-    { label: "Received", done: true, when: timeAgo(request.createdAt) },
-    { label: "Quote sent", done: Boolean(quote.sentAt), when: quote.sentAt ? timeAgo(quote.sentAt) : "Awaiting your review" },
+    { label: "Received", done: true, when: timeAgo(request.createdAt, lang) },
+    { label: "Quote sent", done: Boolean(quote.sentAt), when: quote.sentAt ? timeAgo(quote.sentAt, lang) : "Awaiting your review" },
     declined
-      ? { label: "Declined", done: true, when: quote.respondedAt ? timeAgo(quote.respondedAt) : "", bad: true }
+      ? { label: "Declined", done: true, when: quote.respondedAt ? timeAgo(quote.respondedAt, lang) : "", bad: true }
       : {
           label: "Booked",
           done: quote.status === "ACCEPTED",
           when: quote.scheduledDate
-            ? `For ${formatDate(quote.scheduledDate)}`
+            ? `For ${formatDate(quote.scheduledDate, country)}`
             : quote.sentAt
               ? `Waiting on customer${quote.followUpSentAt ? " · follow-up sent" : ""}`
               : "",

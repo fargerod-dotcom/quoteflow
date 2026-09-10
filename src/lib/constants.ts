@@ -1,12 +1,5 @@
-/** Currency used for every quote/amount in the app. */
-export const CURRENCY = "NOK";
-export const CURRENCY_LOCALE = "nb-NO";
-/** Country code assumed for phone numbers entered without one. */
-export const DEFAULT_COUNTRY_CODE = "47";
-/** Typical Norwegian plumber rates (ex-MVA, NOK), pre-filled at onboarding. */
-export const DEFAULT_HOURLY_RATE = 1150;
-export const DEFAULT_CALLOUT_FEE = 750;
-export const DEFAULT_VAT_RATE = 25;
+/** Currency, locale, phone rules and the default rates now live per country in
+ *  src/lib/countries.ts; the customer-facing copy lives in src/lib/i18n.ts. */
 
 export const TRADES = [
   { value: "PLUMBING", label: "Plumbing" },
@@ -30,14 +23,9 @@ export const REQUEST_STATUS_LABELS: Record<string, string> = {
   DECLINED: "Declined",
 };
 
-export const DEFAULT_SMS_TEMPLATE_NEW_QUOTE =
-  "Hi {{customerName}}, {{businessName}} sent you a quote for your job: {{total}}. View and accept it here: {{link}}";
+/** The three customer-facing SMS defaults are language-aware and live in the
+ *  dictionary instead: sms.newQuote / sms.followUp / sms.confirmation. */
 
-export const DEFAULT_SMS_TEMPLATE_FOLLOW_UP =
-  "Hi {{customerName}}, just a friendly follow-up on the quote {{businessName}} sent you. You can review and accept it here: {{link}}";
-
-export const DEFAULT_SMS_TEMPLATE_CONFIRMATION =
-  "You're booked! {{businessName}} will see you on {{scheduledDate}}. Reply to this text if you need to reschedule.";
-
+/** Owner-facing, so it stays in the dashboard's language. */
 export const OWNER_NEW_REQUEST_SMS =
   "New job request from {{customerName}} ({{customerAddress}}). Review and send a quote: {{link}}";

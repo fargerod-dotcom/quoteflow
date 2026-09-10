@@ -2,8 +2,24 @@ import Anthropic from "@anthropic-ai/sdk";
 import { buildQuotePrompt } from "@/lib/ai/prompt";
 import { parseQuoteResponse, type QuoteDraft } from "@/lib/ai/schema";
 import { logError } from "@/lib/errors";
+import { countryOf, type CountryCode, type Lang } from "@/lib/countries";
 
 const MODEL = "claude-opus-5";
+
+/** Spelled out for the prompt: "NOK" alone reads as a code, not as money. */
+const CURRENCY_NAMES: Record<string, string> = {
+  NOK: "Norwegian kroner",
+  SEK: "Swedish kronor",
+  DKK: "Danish kroner",
+  GBP: "pounds sterling",
+  EUR: "euro",
+  AUD: "Australian dollars",
+  NZD: "New Zealand dollars",
+  USD: "US dollars",
+  CAD: "Canadian dollars",
+};
+
+const LANGUAGE_NAMES: Record<Lang, string> = { nb: "Norwegian", en: "English" };
 
 export type PhotoInput = {
   base64: string;
@@ -17,6 +33,9 @@ export type DraftQuoteInput = {
   description: string;
   photos: PhotoInput[];
   requestId?: string;
+  /** Country the business trades in; decides currency, tax word and the
+   *  fallback language for the quote body. */
+  country: CountryCode;
 };
 
 export type DraftQuoteResult = {
@@ -50,12 +69,17 @@ export async function draftQuote(input: DraftQuoteInput): Promise<DraftQuoteResu
   }
 
   const client = new Anthropic();
+  const c = countryOf(input.country);
   const prompt = buildQuotePrompt({
     trade: input.trade,
     hourlyRate: input.hourlyRate,
     calloutFee: input.calloutFee,
     description: input.description,
     photoCount: input.photos.length,
+    currency: c.currency,
+    currencyName: CURRENCY_NAMES[c.currency] ?? c.currency,
+    taxLabel: c.tax.label,
+    language: LANGUAGE_NAMES[c.lang],
   });
 
   try {

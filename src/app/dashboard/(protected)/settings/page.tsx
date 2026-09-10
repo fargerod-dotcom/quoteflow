@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { ShareLinkCard } from "@/components/request/ShareLinkCard";
-import {
-  DEFAULT_SMS_TEMPLATE_NEW_QUOTE,
-  DEFAULT_SMS_TEMPLATE_FOLLOW_UP,
-  DEFAULT_SMS_TEMPLATE_CONFIRMATION,
-} from "@/lib/constants";
+import { countryOf } from "@/lib/countries";
+import { t } from "@/lib/i18n";
 
 export default async function SettingsPage() {
   const business = await requireBusiness();
+  // Labels and currency follow the business's country; the defaults shown for
+  // the SMS templates are the customer-facing ones, so they follow its language.
+  const { currency, tax, lang } = countryOf(business.country);
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,7 +25,7 @@ export default async function SettingsPage() {
         <form action={updatePrices} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="hourlyRate">Hourly rate (kr ekskl. mva)</Label>
+              <Label htmlFor="hourlyRate">Hourly rate ({currency} excl. {tax.labelInline})</Label>
               <Input
                 id="hourlyRate"
                 name="hourlyRate"
@@ -37,7 +37,7 @@ export default async function SettingsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="calloutFee">Call-out fee (kr ekskl. mva)</Label>
+              <Label htmlFor="calloutFee">Call-out fee ({currency} excl. {tax.labelInline})</Label>
               <Input
                 id="calloutFee"
                 name="calloutFee"
@@ -50,7 +50,7 @@ export default async function SettingsPage() {
             </div>
           </div>
           <div>
-            <Label htmlFor="vatRate">MVA (%)</Label>
+            <Label htmlFor="vatRate">{tax.label} (%)</Label>
             <Input
               id="vatRate"
               name="vatRate"
@@ -63,7 +63,8 @@ export default async function SettingsPage() {
               required
             />
             <p className="mt-1 text-xs text-slate-500">
-              Your rates and line items are ex-MVA; this is added on top of every quote. Set 0 if you&rsquo;re not MVA-registered.
+              {tax.registrationNote ??
+                `Your rates and line items are ex-${tax.labelInline}; this is added on top of every quote. Set 0 if you're not ${tax.label}-registered.`}
             </p>
           </div>
           <div>
@@ -88,7 +89,7 @@ export default async function SettingsPage() {
               id="smsTemplateNewQuote"
               name="smsTemplateNewQuote"
               rows={2}
-              defaultValue={business.smsTemplateNewQuote ?? DEFAULT_SMS_TEMPLATE_NEW_QUOTE}
+              defaultValue={business.smsTemplateNewQuote ?? t("sms.newQuote", lang)}
             />
           </div>
           <div>
@@ -97,7 +98,7 @@ export default async function SettingsPage() {
               id="smsTemplateFollowUp"
               name="smsTemplateFollowUp"
               rows={2}
-              defaultValue={business.smsTemplateFollowUp ?? DEFAULT_SMS_TEMPLATE_FOLLOW_UP}
+              defaultValue={business.smsTemplateFollowUp ?? t("sms.followUp", lang)}
             />
           </div>
           <div>
@@ -106,7 +107,7 @@ export default async function SettingsPage() {
               id="smsTemplateConfirmation"
               name="smsTemplateConfirmation"
               rows={2}
-              defaultValue={business.smsTemplateConfirmation ?? DEFAULT_SMS_TEMPLATE_CONFIRMATION}
+              defaultValue={business.smsTemplateConfirmation ?? t("sms.confirmation", lang)}
             />
           </div>
           <Button type="submit" className="self-start">

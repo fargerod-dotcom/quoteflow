@@ -28,6 +28,14 @@ const en = {
   "intake.heroBody": "Tell us what’s going on, add a couple of photos, and we’ll text you a quote. No obligation.",
   "intake.privacyNote": "Your details are only shared with {business}.",
 
+  // ---- Trades (shown on the customer's intake header) ----
+  "trade.PLUMBING": "Plumbing",
+  "trade.ELECTRICAL": "Electrical",
+  "trade.HVAC": "HVAC",
+  "trade.HANDYMAN": "Handyman",
+  "trade.LANDSCAPING": "Landscaping",
+  "trade.OTHER": "Trade services",
+
   // ---- Intake form ----
   "intake.step1Title": "What needs doing?",
   "intake.step1Hint": "The more detail, the more accurate the quote.",
@@ -36,6 +44,7 @@ const en = {
   "intake.photosLabel": "Photos (optional, up to {max})",
   "intake.step2Title": "Where and who",
   "intake.addressLabel": "Job address",
+  "intake.addressPlaceholder": "12 Main St, Springfield",
   "intake.nameLabel": "Your name",
   "intake.phoneLabel": "Mobile number",
   "intake.phoneHint": "We’ll text your quote here.",
@@ -150,6 +159,13 @@ const nb: Record<MessageKey, string> = {
     "Fortell hva som har skjedd, legg ved et par bilder, så sender vi deg et tilbud på SMS. Helt uforpliktende.",
   "intake.privacyNote": "Opplysningene dine deles bare med {business}.",
 
+  "trade.PLUMBING": "Rørlegger",
+  "trade.ELECTRICAL": "Elektriker",
+  "trade.HVAC": "Ventilasjon og varme",
+  "trade.HANDYMAN": "Altmuligmann",
+  "trade.LANDSCAPING": "Anleggsgartner",
+  "trade.OTHER": "Håndverkertjenester",
+
   "intake.step1Title": "Hva trenger du hjelp med?",
   "intake.step1Hint": "Jo mer du skriver, desto mer treffsikkert blir tilbudet.",
   "intake.descriptionPlaceholder":
@@ -157,6 +173,7 @@ const nb: Record<MessageKey, string> = {
   "intake.photosLabel": "Bilder (valgfritt, inntil {max})",
   "intake.step2Title": "Hvor og hvem",
   "intake.addressLabel": "Adresse for jobben",
+  "intake.addressPlaceholder": "Storgata 12, 0184 Oslo",
   "intake.nameLabel": "Navnet ditt",
   "intake.phoneLabel": "Mobilnummer",
   "intake.phoneHint": "Vi sender tilbudet på SMS hit.",

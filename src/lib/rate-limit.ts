@@ -10,8 +10,7 @@ import { prisma } from "@/lib/prisma";
 export const IP_LIMITS = { perHour: 3, perDay: 10 };
 export const SLUG_LIMITS = { perHour: 20, perDay: 60 };
 
-export const RATE_LIMIT_MESSAGE =
-  "Too many requests from this connection right now. Please try again in an hour, or call the business directly.";
+/** The customer-facing wording lives in the dictionary as error.rateLimit. */
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;

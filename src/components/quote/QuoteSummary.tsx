@@ -1,5 +1,7 @@
-import { formatCurrency } from "@/lib/utils";
-import { calcTotals } from "@/lib/vat";
+import { formatCurrency, formatNumber } from "@/lib/utils";
+import { presentTotals } from "@/lib/tax";
+import { t } from "@/lib/i18n";
+import type { CountryCode, Lang } from "@/lib/countries";
 import type { LineItem } from "@/lib/ai/schema";
 
 export function QuoteSummary({
@@ -7,14 +9,18 @@ export function QuoteSummary({
   vatRate,
   summary,
   estimatedHours,
+  country,
+  lang,
 }: {
   lineItems: LineItem[];
-  /** MVA percentage applied on top of the ex-MVA line items. */
+  /** Tax percentage applied on top of the ex-tax line items. */
   vatRate: number;
   summary: string;
   estimatedHours?: number;
+  country: CountryCode;
+  lang: Lang;
 }) {
-  const { subtotal, vat, total } = calcTotals(lineItems, vatRate);
+  const totals = presentTotals(lineItems, { country, lang, vatRate });
   return (
     <div>
       <p className="text-[15px] leading-relaxed text-slate-700">{summary}</p>
@@ -27,30 +33,30 @@ export function QuoteSummary({
               {item.quantity !== 1 && <span className="text-slate-400"> × {item.quantity}</span>}
             </span>
             <span className="whitespace-nowrap font-medium text-slate-900">
-              {formatCurrency(item.quantity * item.unitPrice)}
+              {formatCurrency(item.quantity * item.unitPrice, country)}
             </span>
           </div>
         ))}
-        {vatRate > 0 && (
+        {totals.kind === "breakdown" && (
           <div className="space-y-1 bg-slate-50 px-4 pt-3 text-sm text-slate-600">
             <div className="flex items-center justify-between">
-              <span>Subtotal ekskl. mva</span>
-              <span>{formatCurrency(subtotal)}</span>
+              <span>{totals.subtotalLabel}</span>
+              <span>{formatCurrency(totals.subtotal, country)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>MVA {vatRate}%</span>
-              <span>{formatCurrency(vat)}</span>
+              <span>{totals.taxLabel}</span>
+              <span>{formatCurrency(totals.tax, country)}</span>
             </div>
           </div>
         )}
         <div className="flex items-center justify-between bg-slate-50 px-4 py-3">
-          <span className="text-base font-semibold text-slate-900">{vatRate > 0 ? "Total inkl. mva" : "Total"}</span>
-          <span className="text-xl font-bold text-brand-600">{formatCurrency(total)}</span>
+          <span className="text-base font-semibold text-slate-900">{totals.totalLabel}</span>
+          <span className="text-xl font-bold text-brand-600">{formatCurrency(totals.total, country)}</span>
         </div>
       </div>
       {estimatedHours !== undefined && estimatedHours > 0 && (
         <p className="mt-2 text-xs text-slate-500">
-          Estimated time on site: about {estimatedHours} hour{estimatedHours === 1 ? "" : "s"}
+          {t("quote.timeOnSite", lang, { hours: formatNumber(estimatedHours, country) })}
         </p>
       )}
     </div>

@@ -2,9 +2,16 @@ import { OnboardingForm } from "@/components/onboarding/OnboardingForm";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select, Textarea } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
-import { DEFAULT_CALLOUT_FEE, DEFAULT_HOURLY_RATE, TRADES, TRIAL_DAYS } from "@/lib/constants";
+import { TRADES, TRIAL_DAYS } from "@/lib/constants";
+import { countryOf, DEFAULT_COUNTRY } from "@/lib/countries";
 
 export default function OnboardingPage() {
+  // No country selector at launch: every plumber in the first hundred is
+  // Norwegian, and a dropdown on step 1 costs conversion. The hidden field is
+  // what a <Select> will replace in month 4 — everything else already reads
+  // from the registry.
+  const c = countryOf(DEFAULT_COUNTRY);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="px-6 py-5">
@@ -18,6 +25,8 @@ export default function OnboardingPage() {
         </p>
 
         <OnboardingForm className="mt-6 flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <input type="hidden" name="country" value={c.code} />
+
           <div>
             <Label htmlFor="name">Business name</Label>
             <Input id="name" name="name" required placeholder="Joe's Plumbing" autoComplete="organization" />
@@ -49,7 +58,7 @@ export default function OnboardingPage() {
               inputMode="tel"
               required
               autoComplete="tel"
-              placeholder="980 53 546"
+              placeholder={c.phone.exampleNational}
             />
             <p className="mt-1 text-xs text-slate-500">
               We text you here the moment a request comes in. Norwegian mobile numbers only for now (8 digits).
@@ -58,7 +67,7 @@ export default function OnboardingPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="hourlyRate">Hourly rate (kr ekskl. mva)</Label>
+              <Label htmlFor="hourlyRate">Hourly rate ({c.currency} excl. {c.tax.labelInline})</Label>
               <Input
                 id="hourlyRate"
                 name="hourlyRate"
@@ -67,11 +76,11 @@ export default function OnboardingPage() {
                 step="0.01"
                 inputMode="decimal"
                 required
-                defaultValue={DEFAULT_HOURLY_RATE}
+                defaultValue={c.defaults.hourlyRate}
               />
             </div>
             <div>
-              <Label htmlFor="calloutFee">Call-out fee (kr ekskl. mva)</Label>
+              <Label htmlFor="calloutFee">Call-out fee ({c.currency} excl. {c.tax.labelInline})</Label>
               <Input
                 id="calloutFee"
                 name="calloutFee"
@@ -80,12 +89,13 @@ export default function OnboardingPage() {
                 step="0.01"
                 inputMode="decimal"
                 required
-                defaultValue={DEFAULT_CALLOUT_FEE}
+                defaultValue={c.defaults.calloutFee}
               />
             </div>
           </div>
           <p className="-mt-2 text-xs text-slate-500">
-            Pre-filled with typical Norwegian plumber rates. MVA (25%) is added on top of every quote. You can change these any time in Settings.
+            Pre-filled with typical rates for {c.name}. {c.tax.label} ({c.tax.defaultRate}%) is added on top of every
+            quote. You can change these any time in Settings.
           </p>
 
           <Button type="submit" size="lg" className="mt-1">

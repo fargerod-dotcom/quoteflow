@@ -9,7 +9,7 @@ import { quoteEmailHtml } from "@/lib/email/templates";
 import { calcTotals } from "@/lib/vat";
 import { interpolate, formatCurrency } from "@/lib/utils";
 import { countryOf } from "@/lib/countries";
-import { DEFAULT_SMS_TEMPLATE_NEW_QUOTE } from "@/lib/constants";
+import { t } from "@/lib/i18n";
 import { lineItemSchema } from "@/lib/ai/schema";
 import { z } from "zod";
 import type { Business, Quote, Request as JobRequest } from "@prisma/client";
@@ -38,13 +38,14 @@ function parseLineItems(formData: FormData, vatRate: number) {
 
 /** Texts (and emails, if we have an address) the customer their quote link. */
 async function deliverQuote(business: Business, request: JobRequest, quote: Quote) {
-  const { code: country } = countryOf(business.country);
+  const { code: country, lang } = countryOf(business.country);
   const link = `${process.env.NEXT_PUBLIC_APP_URL}/q/${quote.acceptToken}`;
   const total = Number(quote.total);
-  const smsBody = interpolate(business.smsTemplateNewQuote ?? DEFAULT_SMS_TEMPLATE_NEW_QUOTE, {
+  // The business's own template wins; the built-in default follows its language.
+  const smsBody = interpolate(business.smsTemplateNewQuote ?? t("sms.newQuote", lang), {
     customerName: request.customerName,
     businessName: business.name,
-    total: formatCurrency(total),
+    total: formatCurrency(total, country),
     link,
   });
 
@@ -52,8 +53,10 @@ async function deliverQuote(business: Business, request: JobRequest, quote: Quot
   if (request.customerEmail) {
     await sendEmail({
       to: request.customerEmail,
-      subject: `Your quote from ${business.name} — ${formatCurrency(total)}`,
+      subject: t("email.quoteSubject", lang, { business: business.name, total: formatCurrency(total, country) }),
       html: quoteEmailHtml({
+        country,
+        lang,
         businessName: business.name,
         customerName: request.customerName,
         summary: quote.summary,

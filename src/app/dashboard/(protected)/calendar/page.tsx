@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireBusiness } from "@/lib/auth-helpers";
 import { WeekView } from "@/components/calendar/WeekView";
 import { formatCurrency } from "@/lib/utils";
+import { countryOf } from "@/lib/countries";
 
 export default async function CalendarPage({
   searchParams,
@@ -12,11 +13,13 @@ export default async function CalendarPage({
 }) {
   const business = await requireBusiness();
 
+  const { code: country, firstDayOfWeek } = countryOf(business.country);
+
   const anchor = searchParams.week ? new Date(searchParams.week) : new Date();
-  const weekStart = startOfWeek(anchor, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(anchor, { weekStartsOn: 1 });
+  const weekStart = startOfWeek(anchor, { weekStartsOn: firstDayOfWeek });
+  const weekEnd = endOfWeek(anchor, { weekStartsOn: firstDayOfWeek });
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
-  const thisWeek = isSameWeek(anchor, new Date(), { weekStartsOn: 1 });
+  const thisWeek = isSameWeek(anchor, new Date(), { weekStartsOn: firstDayOfWeek });
 
   const jobs = await prisma.quote.findMany({
     where: {
@@ -44,7 +47,7 @@ export default async function CalendarPage({
               <>
                 {" · "}
                 <span className="font-medium text-slate-700">
-                  {jobs.length} job{jobs.length === 1 ? "" : "s"}, {formatCurrency(weekTotal)}
+                  {jobs.length} job{jobs.length === 1 ? "" : "s"}, {formatCurrency(weekTotal, country)}
                 </span>
               </>
             )}
@@ -70,7 +73,7 @@ export default async function CalendarPage({
           Nothing booked this week.
         </p>
       )}
-      <WeekView days={days} jobs={jobs} />
+      <WeekView days={days} jobs={jobs} country={country} />
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MAX_PHOTOS, MAX_PHOTO_BYTES } from "@/lib/constants";
+import { t } from "@/lib/i18n";
+import type { Lang } from "@/lib/countries";
 
 type Picked = { file: File; preview: string };
 
@@ -11,7 +13,7 @@ type Picked = { file: File; preview: string };
  * `name="photos"` input via DataTransfer so the plain <form action> submit
  * still carries them.
  */
-export function PhotoUploader() {
+export function PhotoUploader({ lang }: { lang: Lang }) {
   const [picked, setPicked] = useState<Picked[]>([]);
   const [error, setError] = useState<string | null>(null);
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -41,9 +43,13 @@ export function PhotoUploader() {
       const room = MAX_PHOTOS - prev.length;
       const accepted = ok.slice(0, Math.max(0, room));
       if (tooBig.length > 0) {
-        setError(`${tooBig.length === 1 ? "One photo is" : `${tooBig.length} photos are`} over 8MB and was skipped.`);
+        setError(
+          tooBig.length === 1
+            ? t("photos.tooBigOne", lang)
+            : t("photos.tooBigMany", lang, { count: tooBig.length })
+        );
       } else if (ok.length > room) {
-        setError(`You can attach up to ${MAX_PHOTOS} photos.`);
+        setError(t("photos.max", lang, { max: MAX_PHOTOS }));
       } else {
         setError(null);
       }
@@ -97,7 +103,7 @@ export function PhotoUploader() {
             <button
               type="button"
               onClick={() => remove(i)}
-              aria-label="Remove photo"
+              aria-label={t("photos.remove", lang)}
               className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white shadow"
             >
               ×
@@ -113,7 +119,7 @@ export function PhotoUploader() {
               className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-300 text-slate-500 hover:border-brand-400 hover:text-brand-600 sm:hidden"
             >
               <CameraIcon />
-              <span className="text-[11px] font-medium">Camera</span>
+              <span className="text-[11px] font-medium">{t("photos.camera", lang)}</span>
             </button>
             <button
               type="button"
@@ -121,7 +127,7 @@ export function PhotoUploader() {
               className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-300 text-slate-500 hover:border-brand-400 hover:text-brand-600"
             >
               <PlusIcon />
-              <span className="text-[11px] font-medium">{picked.length === 0 ? "Add photos" : "Add more"}</span>
+              <span className="text-[11px] font-medium">{picked.length === 0 ? t("photos.add", lang) : t("photos.addMore", lang)}</span>
             </button>
           </>
         )}
@@ -129,8 +135,8 @@ export function PhotoUploader() {
 
       <p className="mt-2 text-xs text-slate-500">
         {picked.length === 0
-          ? "A photo of the problem helps a lot — the quote will be more accurate."
-          : `${picked.length} of ${MAX_PHOTOS} photos`}
+          ? t("photos.emptyHint", lang)
+          : t("photos.count", lang, { count: picked.length, max: MAX_PHOTOS })}
       </p>
       {error && <p className="mt-1 text-xs text-amber-600">{error}</p>}
     </div>

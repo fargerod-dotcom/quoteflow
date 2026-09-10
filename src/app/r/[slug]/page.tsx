@@ -1,33 +1,36 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { IntakeForm } from "@/components/intake/IntakeForm";
-import { TRADES } from "@/lib/constants";
+import { countryOf } from "@/lib/countries";
+import { t } from "@/lib/i18n";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const business = await prisma.business.findUnique({ where: { slug: params.slug }, select: { name: true } });
+  const business = await prisma.business.findUnique({
+    where: { slug: params.slug },
+    select: { name: true, country: true },
+  });
+  const { lang } = countryOf(business?.country);
   return {
-    title: business ? `Get a quote — ${business.name}` : "Get a quote",
-    description: business
-      ? `Send ${business.name} a few photos and details and get a quote back fast.`
-      : undefined,
+    title: business ? t("intake.metaTitle", lang, { business: business.name }) : t("intake.metaTitleFallback", lang),
+    description: business ? t("intake.metaDescription", lang, { business: business.name }) : undefined,
   };
 }
 
 export default async function IntakePage({ params }: { params: { slug: string } }) {
   const business = await prisma.business.findUnique({ where: { slug: params.slug } });
+  // The page speaks the business's language; an unknown link falls back to it too.
+  const { code: country, lang } = countryOf(business?.country);
 
   if (!business) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Link not found</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          This booking link doesn&rsquo;t match a business. Double-check the link you were given.
-        </p>
+        <h1 className="text-xl font-semibold text-slate-900">{t("intake.notFoundTitle", lang)}</h1>
+        <p className="mt-2 text-sm text-slate-600">{t("intake.notFoundBody", lang)}</p>
       </div>
     );
   }
 
-  const tradeLabel = TRADES.find((t) => t.value === business.trade)?.label ?? business.trade;
+  const tradeLabel = t(`trade.${business.trade}`, lang);
   const initials = business.name
     .split(/\s+/)
     .slice(0, 2)
@@ -50,20 +53,17 @@ export default async function IntakePage({ params }: { params: { slug: string } 
               </p>
             </div>
           </div>
-          <h2 className="mt-6 text-2xl font-bold leading-tight">Get a quote in minutes</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            Tell us what&rsquo;s going on, add a couple of photos, and we&rsquo;ll text you a quote. No
-            obligation.
-          </p>
+          <h2 className="mt-6 text-2xl font-bold leading-tight">{t("intake.heroTitle", lang)}</h2>
+          <p className="mt-2 text-sm text-slate-300">{t("intake.heroBody", lang)}</p>
         </div>
       </div>
 
       <div className="mx-auto -mt-8 max-w-lg px-4 pb-12">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <IntakeForm slug={business.slug} businessName={business.name} />
+          <IntakeForm slug={business.slug} businessName={business.name} country={country} lang={lang} />
         </div>
         <p className="mt-4 text-center text-xs text-slate-400">
-          Your details are only shared with {business.name}.
+          {t("intake.privacyNote", lang, { business: business.name })}
         </p>
       </div>
     </div>

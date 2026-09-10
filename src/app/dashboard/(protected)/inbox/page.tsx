@@ -4,6 +4,7 @@ import { RequestListItem } from "@/components/request/RequestListItem";
 import { ShareLinkCard } from "@/components/request/ShareLinkCard";
 import { REQUEST_STATUS_LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { countryOf } from "@/lib/countries";
 import type { RequestStatus } from "@prisma/client";
 
 const TABS: RequestStatus[] = ["NEW", "QUOTED", "ACCEPTED", "DECLINED"];
@@ -90,7 +91,7 @@ export default async function InboxPage({
       ) : (
         <div className="flex flex-col gap-3">
           {requests.map((request) => (
-            <RequestListItem key={request.id} request={request} />
+            <RequestListItem key={request.id} request={request} country={countryOf(business.country).code} lang="en" />
           ))}
         </div>
       )}

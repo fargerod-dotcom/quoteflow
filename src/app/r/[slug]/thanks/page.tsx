@@ -1,17 +1,20 @@
 import { prisma } from "@/lib/prisma";
+import { countryOf } from "@/lib/countries";
+import { t, type MessageKey } from "@/lib/i18n";
 
-const NEXT = [
-  ["Now", "Your request is with the team. They get a text the moment it lands."],
-  ["Soon", "You'll get a text (and an email if you gave one) with a link to your quote."],
-  ["Then", "Open the link, pick the date that suits you, and you're booked."],
+const NEXT: [MessageKey, MessageKey][] = [
+  ["thanks.step1When", "thanks.step1What"],
+  ["thanks.step2When", "thanks.step2What"],
+  ["thanks.step3When", "thanks.step3What"],
 ];
 
 export default async function IntakeThanksPage({ params }: { params: { slug: string } }) {
   const business = await prisma.business.findUnique({
     where: { slug: params.slug },
-    select: { name: true },
+    select: { name: true, country: true },
   });
-  const name = business?.name ?? "the business";
+  const { lang } = countryOf(business?.country);
+  const name = business?.name ?? t("thanks.businessFallback", lang);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -22,23 +25,21 @@ export default async function IntakeThanksPage({ params }: { params: { slug: str
               <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h1 className="mt-5 text-2xl font-bold text-slate-900">Request sent!</h1>
-          <p className="mt-2 text-sm text-slate-600">
-            {name} has your details. Keep an eye on your phone.
-          </p>
+          <h1 className="mt-5 text-2xl font-bold text-slate-900">{t("thanks.title", lang)}</h1>
+          <p className="mt-2 text-sm text-slate-600">{t("thanks.body", lang, { business: name })}</p>
 
           <ol className="mt-8 flex flex-col gap-4 text-left">
             {NEXT.map(([when, what]) => (
               <li key={when} className="flex gap-3">
                 <span className="w-12 flex-shrink-0 pt-0.5 text-xs font-bold uppercase tracking-wider text-brand-600">
-                  {when}
+                  {t(when, lang)}
                 </span>
-                <span className="text-sm text-slate-700">{what}</span>
+                <span className="text-sm text-slate-700">{t(what, lang)}</span>
               </li>
             ))}
           </ol>
         </div>
-        <p className="mt-6 text-center text-xs text-slate-400">You can close this page.</p>
+        <p className="mt-6 text-center text-xs text-slate-400">{t("thanks.close", lang)}</p>
       </div>
     </div>
   );

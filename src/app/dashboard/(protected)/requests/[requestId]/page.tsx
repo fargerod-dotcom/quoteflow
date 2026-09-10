@@ -14,6 +14,7 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { Input, Label, Textarea } from "@/components/ui/Input";
 import { formatDate, mapsHref, telHref } from "@/lib/utils";
 import { REQUEST_STATUS_LABELS } from "@/lib/constants";
+import { countryOf } from "@/lib/countries";
 import { lineItemSchema } from "@/lib/ai/schema";
 import { z } from "zod";
 
@@ -39,6 +40,9 @@ export default async function RequestDetailPage({
   if (!request || request.businessId !== business.id || !request.quote) notFound();
 
   const quote = request.quote;
+  // Money and dates follow the business; the copy is still English (GTM item 5).
+  const { code: country } = countryOf(business.country);
+  const lang = "en" as const;
   const lineItems = z.array(lineItemSchema).parse(quote.lineItems);
   const isSent = quote.status !== "DRAFT";
   const acceptLink = `${process.env.NEXT_PUBLIC_APP_URL}/q/${quote.acceptToken}`;
@@ -59,7 +63,7 @@ export default async function RequestDetailPage({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">{request.customerName}</h1>
-            <p className="mt-0.5 text-xs text-slate-400">Submitted {formatDate(request.createdAt)}</p>
+            <p className="mt-0.5 text-xs text-slate-400">Submitted {formatDate(request.createdAt, country)}</p>
           </div>
           <StatusBadge status={request.status} label={REQUEST_STATUS_LABELS[request.status]} />
         </div>
@@ -96,7 +100,7 @@ export default async function RequestDetailPage({
         </div>
 
         <div className="mt-5 border-t border-slate-100 pt-4">
-          <StatusTimeline request={request} quote={quote} />
+          <StatusTimeline request={request} quote={quote} country={country} lang={lang} />
         </div>
       </div>
 
@@ -108,7 +112,7 @@ export default async function RequestDetailPage({
           <PhotoGallery photos={request.photos} />
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Customer&rsquo;s preferred dates: {request.preferredDates.map(formatDate).join(", ")}
+          Customer&rsquo;s preferred dates: {request.preferredDates.map((d) => formatDate(d, country)).join(", ")}
         </p>
       </section>
 
@@ -134,6 +138,8 @@ export default async function RequestDetailPage({
               vatRate={Number(quote.vatRate)}
               summary={quote.summary}
               estimatedHours={Number(quote.estimatedHours)}
+              country={country}
+              lang={lang}
             />
             <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
               <CopyButton value={acceptLink} label="Copy customer link" />
@@ -159,7 +165,7 @@ export default async function RequestDetailPage({
           <form action={saveQuoteEdits} className="flex flex-col gap-5">
             <input type="hidden" name="requestId" value={request.id} />
 
-            <LineItemsEditor initialLineItems={lineItems} vatRate={Number(quote.vatRate)} />
+            <LineItemsEditor initialLineItems={lineItems} vatRate={Number(quote.vatRate)} country={country} lang={lang} />
 
             <div className="grid grid-cols-2 gap-4">
               <div>

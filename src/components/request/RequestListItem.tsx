@@ -2,11 +2,21 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/Badge";
 import { formatCurrency, formatDate, timeAgo } from "@/lib/utils";
 import { REQUEST_STATUS_LABELS } from "@/lib/constants";
+import type { CountryCode, Lang } from "@/lib/countries";
 import type { Photo, Quote, Request as JobRequest } from "@prisma/client";
 
 type RequestWithQuote = JobRequest & { quote: Quote | null; photos?: Photo[] };
 
-export function RequestListItem({ request }: { request: RequestWithQuote }) {
+export function RequestListItem({
+  request,
+  country,
+  lang,
+}: {
+  request: RequestWithQuote;
+  country: CountryCode;
+  /** The plumber's own inbox: "en" until the dashboard is translated. */
+  lang: Lang;
+}) {
   const thumb = request.photos?.[0];
   const quote = request.quote;
   const needsReview = request.status === "NEW";
@@ -33,15 +43,15 @@ export function RequestListItem({ request }: { request: RequestWithQuote }) {
               <p className="truncate text-sm text-slate-500">{request.customerAddress}</p>
             </div>
             <div className="flex flex-shrink-0 flex-col items-end gap-1">
-              {quote && <span className="text-base font-bold text-slate-900">{formatCurrency(quote.total)}</span>}
+              {quote && <span className="text-base font-bold text-slate-900">{formatCurrency(quote.total, country)}</span>}
               <StatusBadge status={request.status} label={REQUEST_STATUS_LABELS[request.status]} />
             </div>
           </div>
           <p className="mt-1.5 line-clamp-2 text-sm text-slate-600">{request.description}</p>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
-            <span>{timeAgo(request.createdAt)}</span>
+            <span>{timeAgo(request.createdAt, lang)}</span>
             {quote?.scheduledDate && (
-              <span className="font-medium text-green-700">Booked {formatDate(quote.scheduledDate)}</span>
+              <span className="font-medium text-green-700">Booked {formatDate(quote.scheduledDate, country)}</span>
             )}
             {needsReview && !quote?.aiFailedFallback && (
               <span className="font-medium text-brand-600">Draft ready — tap to review</span>

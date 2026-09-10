@@ -4,10 +4,22 @@ import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { formatCurrency } from "@/lib/utils";
-import { calcTotals } from "@/lib/vat";
+import { presentTotals } from "@/lib/tax";
+import type { CountryCode, Lang } from "@/lib/countries";
 import type { LineItem } from "@/lib/ai/schema";
 
-export function LineItemsEditor({ initialLineItems, vatRate }: { initialLineItems: LineItem[]; vatRate: number }) {
+export function LineItemsEditor({
+  initialLineItems,
+  vatRate,
+  country,
+  lang,
+}: {
+  initialLineItems: LineItem[];
+  vatRate: number;
+  country: CountryCode;
+  /** The plumber's own screen, so this is "en" until the dashboard pass. */
+  lang: Lang;
+}) {
   const [items, setItems] = useState<LineItem[]>(
     initialLineItems.length > 0 ? initialLineItems : [{ description: "", quantity: 1, unitPrice: 0 }]
   );
@@ -24,7 +36,8 @@ export function LineItemsEditor({ initialLineItems, vatRate }: { initialLineItem
     setItems((prev) => [...prev, { description: "", quantity: 1, unitPrice: 0 }]);
   }
 
-  const { subtotal, vat, total } = calcTotals(items, vatRate);
+  // The plumber types ex-tax unit prices and sees the inclusive total below.
+  const totals = presentTotals(items, { country, lang, vatRate });
 
   return (
     <div className="flex flex-col gap-3">
@@ -78,7 +91,7 @@ export function LineItemsEditor({ initialLineItems, vatRate }: { initialLineItem
               />
             </div>
             <div className="pb-2.5 text-right text-sm font-semibold text-slate-900 min-w-[4.5rem]">
-              {formatCurrency(item.quantity * item.unitPrice)}
+              {formatCurrency(item.quantity * item.unitPrice, country)}
             </div>
           </div>
         </div>
@@ -89,21 +102,21 @@ export function LineItemsEditor({ initialLineItems, vatRate }: { initialLineItem
       </Button>
 
       <div className="border-t border-slate-200 pt-3 text-sm text-slate-500">
-        {vatRate > 0 && (
+        {totals.kind === "breakdown" && (
           <>
             <div className="flex items-center justify-between py-0.5">
-              <span>Subtotal ekskl. mva</span>
-              <span>{formatCurrency(subtotal)}</span>
+              <span>{totals.subtotalLabel}</span>
+              <span>{formatCurrency(totals.subtotal, country)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span>MVA {vatRate}%</span>
-              <span>{formatCurrency(vat)}</span>
+              <span>{totals.taxLabel}</span>
+              <span>{formatCurrency(totals.tax, country)}</span>
             </div>
           </>
         )}
         <div className="flex items-center justify-between pt-1">
-          <span className="font-medium">{vatRate > 0 ? "Total inkl. mva" : "Total"}</span>
-          <span className="text-xl font-bold text-slate-900">{formatCurrency(total)}</span>
+          <span className="font-medium">{totals.totalLabel}</span>
+          <span className="text-xl font-bold text-slate-900">{formatCurrency(totals.total, country)}</span>
         </div>
       </div>
     </div>

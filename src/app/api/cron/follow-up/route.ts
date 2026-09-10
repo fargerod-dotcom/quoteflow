@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { sendSms } from "@/lib/sms/twilio";
 import { interpolate } from "@/lib/utils";
 import { countryOf } from "@/lib/countries";
-import { DEFAULT_SMS_TEMPLATE_FOLLOW_UP, FOLLOW_UP_HOURS } from "@/lib/constants";
+import { FOLLOW_UP_HOURS } from "@/lib/constants";
+import { t } from "@/lib/i18n";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -27,13 +28,14 @@ export async function GET(request: Request) {
   for (const quote of dueQuotes) {
     const { business, customerName, customerPhone } = quote.request;
     const link = `${process.env.NEXT_PUBLIC_APP_URL}/q/${quote.acceptToken}`;
-    const body = interpolate(business.smsTemplateFollowUp ?? DEFAULT_SMS_TEMPLATE_FOLLOW_UP, {
+    const { code: country, lang } = countryOf(business.country);
+    const body = interpolate(business.smsTemplateFollowUp ?? t("sms.followUp", lang), {
       customerName,
       businessName: business.name,
       link,
     });
 
-    await sendSms({ businessId: business.id, country: countryOf(business.country).code, to: customerPhone, body });
+    await sendSms({ businessId: business.id, country, to: customerPhone, body });
     await prisma.quote.update({ where: { id: quote.id }, data: { followUpSentAt: new Date() } });
     sent += 1;
   }

@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
+// Operator-facing: not worth threading a country through.
+import { DEFAULT_COUNTRY } from "@/lib/countries";
 
 export default async function AdminBusinessesPage() {
   const businesses = await prisma.business.findMany({
@@ -31,8 +33,8 @@ export default async function AdminBusinessesPage() {
                 <td className="px-4 py-2 text-slate-600">{b.trade}</td>
                 <td className="px-4 py-2 text-slate-600">{b._count.requests}</td>
                 <td className="px-4 py-2 text-slate-600">{b.subscriptionStatus}</td>
-                <td className="px-4 py-2 text-slate-600">{formatDate(b.trialEndsAt)}</td>
-                <td className="px-4 py-2 text-slate-600">{formatDate(b.createdAt)}</td>
+                <td className="px-4 py-2 text-slate-600">{formatDate(b.trialEndsAt, DEFAULT_COUNTRY)}</td>
+                <td className="px-4 py-2 text-slate-600">{formatDate(b.createdAt, DEFAULT_COUNTRY)}</td>
               </tr>
             ))}
           </tbody>

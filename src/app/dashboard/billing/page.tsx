@@ -4,6 +4,7 @@ import { startCheckout } from "@/actions/billing";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatDate } from "@/lib/utils";
+import { countryOf } from "@/lib/countries";
 
 export default async function BillingPage({
   searchParams,
@@ -33,7 +34,7 @@ export default async function BillingPage({
         </p>
         {business.subscriptionStatus === "TRIALING" && (
           <p className="mt-1 text-sm text-slate-600">
-            Trial {active ? "ends" : "ended"} {formatDate(business.trialEndsAt)}
+            Trial {active ? "ends" : "ended"} {formatDate(business.trialEndsAt, countryOf(business.country).code)}
           </p>
         )}
 

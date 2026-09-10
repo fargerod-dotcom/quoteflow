@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
+// Operator-facing: not worth threading a country through.
+import { DEFAULT_COUNTRY } from "@/lib/countries";
 import { REQUEST_STATUS_LABELS } from "@/lib/constants";
 
 export default async function AdminRequestsPage() {
@@ -32,7 +34,7 @@ export default async function AdminRequestsPage() {
                 <td className="px-4 py-2 text-slate-600">
                   {r.quote ? `${r.quote.confidence}${r.quote.aiFailedFallback ? " (fallback)" : ""}` : "—"}
                 </td>
-                <td className="px-4 py-2 text-slate-600">{formatDate(r.createdAt)}</td>
+                <td className="px-4 py-2 text-slate-600">{formatDate(r.createdAt, DEFAULT_COUNTRY)}</td>
               </tr>
             ))}
           </tbody>
