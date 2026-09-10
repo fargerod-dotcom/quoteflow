@@ -88,9 +88,15 @@ model Business {
   trade       Trade  @default(PLUMBING)
   serviceArea String?
 
+  /// ISO 3166-1 alpha-2. Drives currency, locale, tax label, phone rules and
+  /// language via the registry in src/lib/countries.ts. The rates below are
+  /// seeded from that registry at onboarding, then owned by the business.
+  country     String  @default("NO") @db.VarChar(2)
+
   hourlyRate  Decimal @default(1150) @db.Decimal(10, 2)
   calloutFee  Decimal @default(750) @db.Decimal(10, 2)
-  /// MVA (VAT) percentage added on top of ex-MVA line items. 0 if not registered.
+  /// Tax percentage added on top of ex-tax line items. 0 = not registered, and
+  /// is a legitimate, fully-supported value (UK under £90k, US default).
   vatRate     Decimal @default(25) @db.Decimal(5, 2)
 
   smsTemplateNewQuote     String? @db.Text
@@ -180,10 +186,13 @@ model Quote {
 
   lineItems        Json
   estimatedHours   Decimal         @db.Decimal(6, 2)
-  /// Total the customer pays, including MVA.
+  /// Total the customer pays, including tax.
   total            Decimal         @db.Decimal(10, 2)
-  /// MVA percentage snapshotted from the business when the quote was drafted.
+  /// Tax percentage snapshotted from the business when the quote was drafted.
   vatRate          Decimal         @default(25) @db.Decimal(5, 2)
+  /// ISO 4217, snapshotted from the business's country when drafted, so a quote
+  /// sent last year still records the currency it was priced in.
+  currency         String          @default("NOK") @db.VarChar(3)
   summary          String          @db.Text
   confidence       QuoteConfidence @default(MEDIUM)
   aiRawResponse    Json?
