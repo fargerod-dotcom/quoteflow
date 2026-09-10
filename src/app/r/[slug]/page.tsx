@@ -23,7 +23,7 @@ export default async function IntakePage({ params }: { params: { slug: string } 
 
   if (!business) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
+      <div lang={lang} className="mx-auto max-w-lg px-4 py-16 text-center">
         <h1 className="text-xl font-semibold text-slate-900">{t("intake.notFoundTitle", lang)}</h1>
         <p className="mt-2 text-sm text-slate-600">{t("intake.notFoundBody", lang)}</p>
       </div>
@@ -38,7 +38,7 @@ export default async function IntakePage({ params }: { params: { slug: string } 
     .join("");
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div lang={lang} className="min-h-screen bg-slate-50">
       <div className="bg-slate-900 px-4 pb-16 pt-8 text-white">
         <div className="mx-auto max-w-lg">
           <div className="flex items-center gap-3">

@@ -17,7 +17,7 @@ export default async function IntakeThanksPage({ params }: { params: { slug: str
   const name = business?.name ?? t("thanks.businessFallback", lang);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div lang={lang} className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-lg px-4 py-14">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">

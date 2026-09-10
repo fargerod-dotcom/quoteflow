@@ -17,14 +17,16 @@ export const metadata: Metadata = { title: t("quote.metaTitle", countryOf(DEFAUL
 function Shell({
   businessName,
   eyebrow,
+  lang,
   children,
 }: {
   businessName: string;
   eyebrow: string;
+  lang: Lang;
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div lang={lang} className="min-h-screen bg-slate-50">
       <div className="bg-slate-900 px-4 pb-14 pt-8 text-white">
         <div className="mx-auto max-w-lg">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{eyebrow}</p>
@@ -47,7 +49,7 @@ export default async function PublicQuotePage({ params }: { params: { acceptToke
   if (!quote) {
     const lang: Lang = countryOf(DEFAULT_COUNTRY).lang;
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
+      <div lang={lang} className="mx-auto max-w-lg px-4 py-16 text-center">
         <h1 className="text-xl font-semibold text-slate-900">{t("quote.notFoundTitle", lang)}</h1>
         <p className="mt-2 text-sm text-slate-600">{t("quote.notFoundBody", lang)}</p>
       </div>
@@ -68,7 +70,7 @@ export default async function PublicQuotePage({ params }: { params: { acceptToke
       location: quote.request.customerAddress,
     });
     return (
-      <Shell businessName={business.name} eyebrow={t("quote.eyebrowBooked", lang)}>
+      <Shell lang={lang} businessName={business.name} eyebrow={t("quote.eyebrowBooked", lang)}>
         <div className="text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
             <svg className="h-7 w-7 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
@@ -115,7 +117,7 @@ export default async function PublicQuotePage({ params }: { params: { acceptToke
 
   if (quote.status === "DECLINED") {
     return (
-      <Shell businessName={business.name} eyebrow={t("quote.eyebrowDeclined", lang)}>
+      <Shell lang={lang} businessName={business.name} eyebrow={t("quote.eyebrowDeclined", lang)}>
         <h2 className="text-xl font-bold text-slate-900">{t("quote.declinedTitle", lang)}</h2>
         <p className="mt-2 text-sm text-slate-600">{t("quote.declinedBody", lang, { business: business.name })}</p>
       </Shell>
@@ -124,7 +126,7 @@ export default async function PublicQuotePage({ params }: { params: { acceptToke
 
   if (quote.status !== "SENT") {
     return (
-      <Shell businessName={business.name} eyebrow={t("quote.eyebrowYours", lang)}>
+      <Shell lang={lang} businessName={business.name} eyebrow={t("quote.eyebrowYours", lang)}>
         <h2 className="text-xl font-bold text-slate-900">{t("quote.notReadyTitle", lang)}</h2>
         <p className="mt-2 text-sm text-slate-600">{t("quote.notReadyBody", lang)}</p>
       </Shell>
@@ -132,7 +134,7 @@ export default async function PublicQuotePage({ params }: { params: { acceptToke
   }
 
   return (
-    <Shell businessName={business.name} eyebrow={t("quote.eyebrowFor", lang, { name: quote.request.customerName })}>
+    <Shell lang={lang} businessName={business.name} eyebrow={t("quote.eyebrowFor", lang, { name: quote.request.customerName })}>
       <QuoteSummary
         lineItems={lineItems}
         vatRate={Number(quote.vatRate)}
