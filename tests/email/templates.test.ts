@@ -24,7 +24,7 @@ describe("quoteEmailHtml", () => {
 
   it("includes every line item with its extended price and the total", () => {
     expect(html).toContain("Call-out fee");
-    expect(nok(html)).toContain("75,00 kr");
+    expect(nok(html)).toContain("75 kr");
     expect(html).toContain("Labour");
     expect(html).toContain("× 1.5");
     expect(nok(html)).toContain("142,50 kr");
@@ -32,7 +32,7 @@ describe("quoteEmailHtml", () => {
     expect(nok(html)).toContain("MVA 25 %");
     expect(nok(html)).toContain("54,38 kr");
     expect(nok(html)).toContain("271,88 kr");
-    expect(html).toContain("Total inkl. mva");
+    expect(html).toContain("Totalt inkl. mva");
   });
 
   it("is written in Norwegian for a Norwegian business", () => {
@@ -56,7 +56,7 @@ describe("quoteEmailHtml", () => {
     });
     expect(plain).not.toContain("MVA");
     expect(plain).not.toContain("ekskl.");
-    expect(plain).toContain(">Total<");
+    expect(plain).toContain(">Totalt<");
   });
 
   it("shows no VAT line at all for a British business under the threshold", () => {
@@ -77,7 +77,7 @@ describe("quoteEmailHtml", () => {
     });
     expect(gb).not.toContain("VAT");
     expect(gb).not.toContain("Subtotal");
-    expect(gb).toContain("£195.00");
+    expect(gb).toContain("£195");
     expect(gb).toContain(">Total<");
   });
 
@@ -97,7 +97,7 @@ describe("quoteEmailHtml", () => {
     expect(gb).toContain("Subtotal excl. VAT");
     expect(gb).toContain("VAT 20%");
     expect(gb).toContain("Total incl. VAT");
-    expect(gb).toContain("£36.00");
+    expect(gb).toContain("£36");
   });
 
   it("links to the accept page and names the business", () => {
@@ -154,7 +154,7 @@ describe("ownerNewRequestEmailHtml", () => {
       link: "https://example.com/dashboard/requests/1",
     });
     expect(html).toContain("Leaking\nunder sink");
-    expect(nok(html)).toContain("125,00 kr");
+    expect(nok(html)).toContain("125 kr");
     expect(html).toContain("New job request");
     expect(html).toContain('href="https://example.com/dashboard/requests/1"');
   });

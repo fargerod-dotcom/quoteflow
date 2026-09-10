@@ -7,7 +7,7 @@ const norm = (s: string) => s.replace(/\s/g, " ");
 describe("formatCurrency", () => {
   it("formats in the country's currency and separators", () => {
     expect(norm(formatCurrency(1234.5, "NO"))).toBe("1 234,50 kr");
-    expect(norm(formatCurrency("75", "NO"))).toBe("75,00 kr");
+    expect(norm(formatCurrency("75", "NO"))).toBe("75 kr");
     expect(norm(formatCurrency(1234.5, "GB"))).toBe("£1,234.50");
     expect(norm(formatCurrency(1234.5, "US"))).toBe("$1,234.50");
     expect(norm(formatCurrency(1234.5, "SE"))).toBe("1 234,50 kr");

@@ -7,7 +7,15 @@ import { countryOf, type CountryCode, type Lang } from "@/lib/countries";
  *  site keep formatting in NOK with the compiler saying nothing. */
 export function formatCurrency(value: number | string | Decimal, country: CountryCode): string {
   const c = countryOf(country);
-  return new Intl.NumberFormat(c.locale, { style: "currency", currency: c.currency }).format(Number(value));
+  const n = Number(value);
+  // Whole amounts drop the decimals ("750 kr", "£45"); fractional ones keep two.
+  const fraction = Number.isInteger(n) ? 0 : 2;
+  return new Intl.NumberFormat(c.locale, {
+    style: "currency",
+    currency: c.currency,
+    minimumFractionDigits: fraction,
+    maximumFractionDigits: fraction,
+  }).format(n);
 }
 
 /** Formats a number in the country's locale (decimal comma in nb-NO). */

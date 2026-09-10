@@ -15,7 +15,7 @@ describe("presentTotals", () => {
     const p = presentTotals(ITEMS, { country: code, vatRate: 0, lang: countryOf(code).lang });
     expect(p.kind).toBe("none");
     expect(p.total).toBe(3050);
-    expect(p.totalLabel).toBe(countryOf(code).lang === "nb" ? "Total" : "Total");
+    expect(p.totalLabel).toBe(countryOf(code).lang === "nb" ? "Totalt" : "Total");
     expect(JSON.stringify(p)).not.toMatch(/excl|ekskl/);
   });
 
@@ -34,7 +34,7 @@ describe("presentTotals", () => {
       total: 3812.5,
       subtotalLabel: "Delsum ekskl. mva",
       taxLabel: "MVA 25 %",
-      totalLabel: "Total inkl. mva",
+      totalLabel: "Totalt inkl. mva",
     });
   });
 

@@ -156,7 +156,7 @@ const nb: Record<MessageKey, string> = {
   "intake.notFoundBody": "Denne lenken hører ikke til noen bedrift. Dobbeltsjekk lenken du fikk.",
   "intake.heroTitle": "Få pristilbud på minutter",
   "intake.heroBody":
-    "Fortell hva som har skjedd, legg ved et par bilder, så sender vi deg et tilbud på SMS. Helt uforpliktende.",
+    "Beskriv problemet, legg ved et par bilder, så får du et tilbud på SMS. Helt uforpliktende.",
   "intake.privacyNote": "Opplysningene dine deles bare med {business}.",
 
   "trade.PLUMBING": "Rørlegger",
@@ -228,18 +228,18 @@ const nb: Record<MessageKey, string> = {
   "quote.notReadyTitle": "Dette tilbudet er ikke klart ennå",
   "quote.notReadyBody": "Du får en SMS så snart det er sendt.",
   "quote.jobAtNote": "Jobben utføres på {address}. Når du godtar, bekrefter du datoen – ingenting belastes her.",
-  "quote.timeOnSite": "Beregnet tid på stedet: ca. {hours} t",
+  "quote.timeOnSite": "Beregnet tid på stedet: ca. {hours} timer",
   "quote.pickDate": "Velg en dato",
   "quote.pickDateHint": "Dette er datoene du sa passet.",
-  "quote.accept": "Godta og book",
+  "quote.accept": "Godta tilbudet",
   "quote.pending": "Et øyeblikk …",
   "quote.decline": "Nei takk, avslå",
   "quote.declineConfirm": "Vil du avslå tilbudet? Bedriften får beskjed.",
 
-  "quote.total": "Total",
+  "quote.total": "Totalt",
   "quote.subtotalExTax": "Delsum ekskl. {tax}",
   "quote.taxAtRate": "{tax} {rate} %",
-  "quote.totalInclTax": "Total inkl. {tax}",
+  "quote.totalInclTax": "Totalt inkl. {tax}",
 
   "error.linkInvalid": "Denne bestillingslenken er ikke gyldig lenger.",
   "error.missingFields": "Fyll ut alle obligatoriske felter, og velg minst én ønsket dato.",
